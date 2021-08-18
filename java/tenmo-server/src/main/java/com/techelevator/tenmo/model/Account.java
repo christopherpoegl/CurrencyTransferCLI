@@ -9,10 +9,10 @@ public class Account {
     private BigDecimal balance;
     //private List<Transfer> transfers;
 
-    public Account(long id, long userId) {
+    public Account(long id, long userId, BigDecimal balance) {
         this.id = id;
         this.userId = userId;
-        this.balance = new BigDecimal("1000.00");
+        this.balance = balance;
         //this.transfers = new ArrayList<>();
     }
 
@@ -28,10 +28,11 @@ public class Account {
         return balance;
     }
 
-    /* todo:
-    public void addToBalance(Transfer transfer???){}
-    public void subtractFromBalance(Transfer transfer???){}
-     */
+    public void addAmount(BigDecimal amount) {
+        this.balance = this.balance.add(amount);
+    }
 
-
+    public void subtractAmount(BigDecimal amount) {
+        this.balance = this.balance.subtract(amount);
+    }
 }

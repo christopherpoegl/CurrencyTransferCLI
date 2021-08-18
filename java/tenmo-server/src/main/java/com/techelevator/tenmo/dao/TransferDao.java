@@ -9,11 +9,11 @@ import java.util.List;
 public interface TransferDao {
 
 
-    Transfer send(BigDecimal amount);
+    public BigDecimal send(Long sendingUserId, Long receivingUserId, BigDecimal amount);
 
-    List<Transfer> getTransfersByUserId(long userId);
+   // public List<Transfer> getTransfersByUserId(long userId);
 
-    Transfer get(long transferId);
+    //Transfer get(long transferId);
 
 
 }

@@ -22,4 +22,28 @@ public class Transfer {
         this.amount = amount;
 
     }
+
+    public long getTransfer_id() {
+        return transfer_id;
+    }
+
+    public String getTransfer_type_desc() {
+        return transfer_type_desc;
+    }
+
+    public String getTransfer_status_desc() {
+        return transfer_status_desc;
+    }
+
+    public long getAccount_from() {
+        return account_from;
+    }
+
+    public long getAccount_to() {
+        return account_to;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
 }
