@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class AccountController {
     @Autowired
     UserDao userDao;
 
-    @RequestMapping(path = "", method = RequestMethod.GET)
+    @RequestMapping(path = "/balance", method = RequestMethod.GET)
     public Account getAccount(Principal principal) {
         return accountDao.getAccountByUserName(principal.getName());
     }

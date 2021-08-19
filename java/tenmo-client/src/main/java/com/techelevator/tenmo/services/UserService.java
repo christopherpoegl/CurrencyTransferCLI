@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 public class UserService {
 
     private String BASE_URL;
-    private RestTemplate restTemplate;
+    private RestTemplate restTemplate = new RestTemplate();
     private String AUTH_TOKEN;
 
     public UserService(String url) {
@@ -23,11 +23,9 @@ public class UserService {
         AUTH_TOKEN = token;
     }
 
-    public String getAuthToken() {return AUTH_TOKEN;}
-
     public BigDecimal getBalance() throws UserServiceException {
         try {
-            Account account = restTemplate.exchange("http://localhost:8080/account", HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
+            Account account = restTemplate.exchange(BASE_URL + "/balance", HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
             return account.getBalance();
         } catch (RestClientResponseException e) {
             throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());

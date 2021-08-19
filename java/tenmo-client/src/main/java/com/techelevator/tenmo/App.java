@@ -53,7 +53,6 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		
 		registerAndLogin();
 		userService.setAuthToken(currentUser.getToken());
-		System.out.println(userService.getAuthToken());
 		mainMenu();
 	}
 
@@ -82,9 +81,9 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	private void viewCurrentBalance() {
 
 		try {
-			System.out.println(userService.getBalance());
+			System.out.println("Welcome " + currentUser.getUser().getUsername() + ".  Your account balance is " +userService.getBalance()+ ".");
 		} catch (UserServiceException e) {
-
+			System.out.println(e.getMessage());
 		}
 
 
