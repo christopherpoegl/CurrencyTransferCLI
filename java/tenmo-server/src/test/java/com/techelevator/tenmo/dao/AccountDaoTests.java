@@ -26,19 +26,8 @@ public class AccountDaoTests extends TenmoDaoTests {
     @Test
     public void create_user_and_call_get_balance_for_id_returns_1000() {
         userDao.create("user", "password");
-        long userId = userDao.findIdByUsername("user");
-        long accountId = accountDao.getAccountByUserId(userId).getId();
-        BigDecimal balance = accountDao.getBalance(accountId);
-        Assert.assertTrue(balance.equals(new BigDecimal("1000.00").setScale(2, RoundingMode.HALF_UP)));
-    }
-
-    @Test
-    public void add_and_subtract_account_tests() {
-        Account account = new Account(100, 100, new BigDecimal("1000.00"));
-        account.addAmount(new BigDecimal("100.00"));
-        Assert.assertTrue(new BigDecimal("1100.00").equals(account.getBalance()));
-        account.subtractAmount(new BigDecimal("100.00"));
-        Assert.assertTrue(new BigDecimal("1000.00").equals(account.getBalance()));
+        BigDecimal balance = accountDao.getBalanceByUserName("user");
+        Assert.assertEquals(new BigDecimal("1000.00"), balance);
     }
 
     @Test
@@ -51,8 +40,8 @@ public class AccountDaoTests extends TenmoDaoTests {
         long toUserId = userDao.findIdByUsername("user2");
         long toAccountId = accountDao.getAccountByUserId(toUserId).getId();
         accountDao.updateAccountBalances(fromAccountId, toAccountId, new BigDecimal("100.00"));
-        BigDecimal user1Balance = accountDao.getBalance(fromAccountId);
-        BigDecimal user2Balance = accountDao.getBalance(toAccountId);
+        BigDecimal user1Balance = accountDao.getBalanceByAccountId(fromAccountId);
+        BigDecimal user2Balance = accountDao.getBalanceByAccountId(toAccountId);
 
         Assert.assertTrue(""+ user1Balance,user1Balance.equals(new BigDecimal("900.00").setScale(2, RoundingMode.HALF_UP)));
         Assert.assertTrue(""+user2Balance, user2Balance.equals(new BigDecimal("1100.00").setScale(2, RoundingMode.HALF_UP)));

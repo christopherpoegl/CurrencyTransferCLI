@@ -14,4 +14,6 @@ public interface TransferDao {
     public List<Transfer> listTransfersByAccountId(long accountId);
 
     public Transfer getTransferByTransferId (long transferId);
+
+    public String getTypeDesc(long transferTypeId);
 }

@@ -12,6 +12,7 @@ public class Transfer {
     private BigDecimal amount;
 
     private long transfer_type_id;
+    private long transfer_status_id;
 
 
 
@@ -80,4 +81,7 @@ public class Transfer {
     public void setTransfer_type_id(long transfer_type_id) {
         this.transfer_type_id = transfer_type_id;
     }
+
+    public void setTransfer_status_id(long transfer_status_id) {this.transfer_status_id = transfer_status_id;}
+
 }

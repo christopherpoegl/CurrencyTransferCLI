@@ -4,16 +4,18 @@ package com.techelevator.tenmo.dao;
 import com.techelevator.tenmo.model.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
+@Component
 public class JdbcAccountDao implements AccountDao {
 
     JdbcTemplate jdbcTemplate;
 
     public JdbcAccountDao(JdbcTemplate jdbcTemplate) {this.jdbcTemplate = jdbcTemplate;}
 
-    public BigDecimal getBalance(long id) throws RuntimeException {
+    public BigDecimal getBalanceByAccountId(long id) throws RuntimeException {
         String sql = "SELECT balance FROM accounts WHERE account_id = ?";
         SqlRowSet result = jdbcTemplate.queryForRowSet(sql, id);
 
@@ -25,6 +27,13 @@ public class JdbcAccountDao implements AccountDao {
             System.out.println("Oh no we didn't get the balance!");
             throw new RuntimeException();
         }
+    }
+
+    public BigDecimal getBalanceByUserName(String userName) {
+        UserDao userDao = new JdbcUserDao(jdbcTemplate);
+        long userId = userDao.findIdByUsername(userName);
+        long accountNumber = getAccountByUserId(userId).getId();
+        return getBalanceByAccountId(accountNumber);
     }
 
     public Account getAccountById(long id) throws RuntimeException {
