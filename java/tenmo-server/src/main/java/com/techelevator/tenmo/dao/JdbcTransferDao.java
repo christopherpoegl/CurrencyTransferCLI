@@ -7,6 +7,8 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class JdbcTransferDao implements TransferDao {
@@ -28,5 +30,55 @@ public class JdbcTransferDao implements TransferDao {
         accountDao.updateAccountBalances(sendingAccountId, receivingAccountId, amount);
 
         return transferAmount;
+    }
+
+
+    public List<Transfer> listTransfersByAccountId(long accountId){
+        List<Transfer> transfers = new ArrayList<>();
+        String sql = "SELECT transfer_id, user_id\n" +
+                "FROM accounts\n" +
+                "JOIN transfers ON accounts.account_id = transfers.account_from\n" +
+                "WHERE user_id = ?;";
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, accountId);
+        while(results.next()) {
+            Transfer transfer = mapRowToTransfer(results);
+            transfers.add(transfer);
+        }
+        sql = "SELECT transfer_id, user_id\n" +
+                "FROM accounts\n" +
+                "JOIN transfers ON accounts.account_id = transfers.account_to\n" +
+                "WHERE user_id = ?;";
+        results = jdbcTemplate.queryForRowSet(sql, accountId);
+        while(results.next()) {
+            Transfer transfer = mapRowToTransfer(results);
+            transfers.add(transfer);
+        }
+        return transfers;
+    }
+
+
+    public Transfer getTransferByTransferId(long transferId) {
+        Transfer transfer = null;
+        String sql = "SELECT transfer_id, transfer_type_id, "+
+    "account_from, account_to, amount FROM transfers WHERE transfer_id = ? ";
+
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql,transferId);
+        if(results.next()) {
+            transfer = mapRowToTransfer(results);
+        }
+
+        return transfer;
+    }
+
+
+    private Transfer mapRowToTransfer(SqlRowSet rs) {
+        Transfer t = new Transfer();
+        t.setTransfer_id(rs.getLong("transfer_id"));
+        t.setTransfer_type_id(rs.getLong("transfer_type_id"));
+        t.setAccount_from(rs.getLong("account_from"));
+        t.setAccount_to(rs.getLong("account_to"));
+        t.setAmount(rs.getBigDecimal("amount"));
+
+        return t;
     }
 }

@@ -11,9 +11,7 @@ public interface TransferDao {
 
     public BigDecimal send(Long sendingUserId, Long receivingUserId, BigDecimal amount);
 
-   // public List<Transfer> getTransfersByUserId(long userId);
+    public List<Transfer> listTransfersByAccountId(long accountId);
 
-    //Transfer get(long transferId);
-
-
+    public Transfer getTransferByTransferId (long transferId);
 }

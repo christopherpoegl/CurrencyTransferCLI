@@ -46,4 +46,5 @@ public class JdbcTransferDaoTest extends TenmoDaoTests {
         Assert.assertTrue(""+actualAccount2Balance, actualAccount2Balance.equals(new BigDecimal("1100.00").setScale(2, RoundingMode.HALF_UP)));
     }
 
+
 }
