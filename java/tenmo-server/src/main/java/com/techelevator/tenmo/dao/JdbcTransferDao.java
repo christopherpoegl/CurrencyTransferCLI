@@ -17,19 +17,21 @@ public class JdbcTransferDao implements TransferDao {
 
     public JdbcTransferDao(JdbcTemplate jdbcTemplate){this.jdbcTemplate = jdbcTemplate;}
 
-    public BigDecimal send(Long sendingAccountId, Long receivingAccountId, BigDecimal amount){
-        String get_transfer_type_id = "SELECT transfer_type_id FROM transfer_types WHERE transfer_type_desc = ?";
-        long transfer_type_id = jdbcTemplate.queryForObject(get_transfer_type_id, Long.class, "Send");
-        String get_transfer_status_id = "SELECT transfer_status_id FROM transfer_statuses WHERE transfer_status_desc = ?";
-        long transfer_status_id = jdbcTemplate.queryForObject(get_transfer_status_id, Long.class, "Approved");
+    public Transfer createTransfer(Transfer transfer) {
 
+
+        if (transfer.getTransfer_type_desc() == "Send") send(transfer.getAccount_from(), transfer.getAccount_to(), transfer.getAmount());
         String sql = "INSERT INTO transfers (transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
-                "VALUES (?,?,?,?,?) RETURNING amount";
-        BigDecimal transferAmount = jdbcTemplate.queryForObject(sql, BigDecimal.class, transfer_type_id, transfer_status_id, sendingAccountId, receivingAccountId, amount);
+                "VALUES (?,?,?,?,?) RETURNING transfer_id";
+        long transfer_id = jdbcTemplate.queryForObject(sql, Long.class, transfer.getTransfer_type_id(), transfer.getTransfer_status_id(), transfer.getAccount_from(), transfer.getAccount_to(), transfer.getAmount());
+        return getTransferByTransferId(transfer_id);
+    }
+
+    public void send(Long sendingAccountId, Long receivingAccountId, BigDecimal amount){
+
         AccountDao accountDao = new JdbcAccountDao(jdbcTemplate);
         accountDao.updateAccountBalances(sendingAccountId, receivingAccountId, amount);
 
-        return transferAmount;
     }
 
 
@@ -65,12 +67,18 @@ public class JdbcTransferDao implements TransferDao {
         return jdbcTemplate.queryForObject(sql, String.class, transferTypeId);
     }
 
+    public String getStatusDesc(long transferStatusId) {
+        String sql = "SELECT transfer_status_desc FROM transfer_statuses WHERE transfer_status_id = ?;";
+        return jdbcTemplate.queryForObject(sql, String.class, transferStatusId);
+    }
 
     private Transfer mapRowToTransfer(SqlRowSet rs) {
         Transfer t = new Transfer();
         t.setTransfer_id(rs.getLong("transfer_id"));
         t.setTransfer_type_id(rs.getLong("transfer_type_id"));
+        t.setTransfer_type_desc(getTypeDesc(t.getTransfer_type_id()));
         t.setTransfer_status_id(rs.getLong("transfer_status_id"));
+        t.setTransfer_status_desc(getStatusDesc(t.getTransfer_status_id()));
         t.setAccount_from(rs.getLong("account_from"));
         t.setAccount_to(rs.getLong("account_to"));
         t.setAmount(new BigDecimal(rs.getString("amount")));

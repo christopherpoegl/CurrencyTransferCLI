@@ -33,14 +33,17 @@ public class JdbcTransferDaoTest extends TenmoDaoTests {
         userDao.create("user1", "password");
         userDao.create("user2", "password");
 
-        long user1Id = userDao.findIdByUsername("user1");
-        long user2Id = userDao.findIdByUsername("user2");
-        long account1Id = accountDao.getAccountByUserId(user1Id).getId();
-        long account2Id = accountDao.getAccountByUserId(user2Id).getId();
-        BigDecimal actualTransferValue = transferDao.send(account1Id, account2Id, new BigDecimal("100.00"));
+        Transfer transfer = new Transfer();
+        transfer.setTransfer_status_id(2);
+        transfer.setTransfer_type_id(2);
+        transfer.setAccount_from(accountDao.getAccountByUserName("user1").getId());
+        transfer.setAccount_to(accountDao.getAccountByUserName("user2").getId());
+        transfer.setAmount(new BigDecimal("100.00"));
 
-        BigDecimal actualAccount1Balance = accountDao.getBalanceByAccountId(account1Id);
-        BigDecimal actualAccount2Balance = accountDao.getBalanceByAccountId(account2Id);
+        transfer = transferDao.createTransfer(transfer);
+        BigDecimal actualTransferValue = transfer.getAmount();
+        BigDecimal actualAccount1Balance = accountDao.getAccountByUserName("user1").getBalance();
+        BigDecimal actualAccount2Balance = accountDao.getAccountByUserName("user2").getBalance();
 
         Assert.assertTrue(""+actualTransferValue, actualTransferValue.equals(new BigDecimal("100.00").setScale(2, RoundingMode.HALF_UP)));
         Assert.assertTrue(""+actualAccount1Balance, actualAccount1Balance.equals(new BigDecimal("900.00").setScale(2, RoundingMode.HALF_UP)));
@@ -58,16 +61,20 @@ public class JdbcTransferDaoTest extends TenmoDaoTests {
         userDao.create("user1", "password");
         userDao.create("user2", "password");
 
-        long user1Id = userDao.findIdByUsername("user1");
-        long user2Id = userDao.findIdByUsername("user2");
-        long account1Id = accountDao.getAccountByUserId(user1Id).getId();
-        long account2Id = accountDao.getAccountByUserId(user2Id).getId();
 
-        BigDecimal thisDoesntMatter = transferDao.send(account1Id, account2Id, new BigDecimal("100.00"));
-        thisDoesntMatter = transferDao.send(account1Id, account2Id, new BigDecimal("300.00"));
+        Transfer transfer = new Transfer();
+        transfer.setTransfer_status_id(2);
+        transfer.setTransfer_type_id(2);
+        transfer.setAccount_from(accountDao.getAccountByUserName("user1").getId());
+        transfer.setAccount_to(accountDao.getAccountByUserName("user2").getId());
+        transfer.setAmount(new BigDecimal("100.00"));
 
-        Assert.assertEquals(2, transferDao.listTransfersByAccountId(account1Id).size());
-        Assert.assertEquals(2, transferDao.listTransfersByAccountId(account2Id).size());
+        transfer = transferDao.createTransfer(transfer);
+        transfer.setAmount(new BigDecimal("300.00"));
+        transfer = transferDao.createTransfer(transfer);
+
+        Assert.assertEquals(2, transferDao.listTransfersByAccountId(accountDao.getAccountByUserName("user1").getId()).size());
+        Assert.assertEquals(2, transferDao.listTransfersByAccountId(accountDao.getAccountByUserName("user2").getId()).size());
     }
 
     @Test
@@ -75,12 +82,17 @@ public class JdbcTransferDaoTest extends TenmoDaoTests {
         userDao.create("user1", "password");
         userDao.create("user2", "password");
 
-        long user1Id = userDao.findIdByUsername("user1");
-        long user2Id = userDao.findIdByUsername("user2");
-        long account1Id = accountDao.getAccountByUserId(user1Id).getId();
-        long account2Id = accountDao.getAccountByUserId(user2Id).getId();
+        Transfer transfer = new Transfer();
+        transfer.setTransfer_status_id(2);
+        transfer.setTransfer_type_id(2);
+        transfer.setAccount_from(accountDao.getAccountByUserName("user1").getId());
+        transfer.setAccount_to(accountDao.getAccountByUserName("user2").getId());
+        transfer.setAmount(new BigDecimal("100.00"));
 
-        BigDecimal thisDoesntMatter = transferDao.send(account1Id, account2Id, new BigDecimal("100.00"));
+        transfer = transferDao.createTransfer(transfer);
+        long account1Id = accountDao.getAccountByUserName("user1").getId();
+        long account2Id = accountDao.getAccountByUserName("user2").getId();
+
         List<Transfer> transfers =transferDao.listTransfersByAccountId(account1Id);
         long transferId = transfers.get(0).getTransfer_id();
         BigDecimal actualValue = transferDao.getTransferByTransferId(transferId).getAmount();

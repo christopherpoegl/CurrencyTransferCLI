@@ -12,7 +12,9 @@ public interface AccountDao {
 
     public Account getAccountById(long id);
 
-    public Account getAccountByUserId(long userId);
+    //public Account getAccountByUserId(long userId);
+
+    public Account getAccountByUserName(String userName);
 
     public void updateAccountBalances(long fromAccountId, long toAccountId, BigDecimal amount);
 

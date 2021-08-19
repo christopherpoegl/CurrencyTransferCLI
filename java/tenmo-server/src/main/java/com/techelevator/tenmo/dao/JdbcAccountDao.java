@@ -30,9 +30,7 @@ public class JdbcAccountDao implements AccountDao {
     }
 
     public BigDecimal getBalanceByUserName(String userName) {
-        UserDao userDao = new JdbcUserDao(jdbcTemplate);
-        long userId = userDao.findIdByUsername(userName);
-        long accountNumber = getAccountByUserId(userId).getId();
+        long accountNumber = getAccountByUserName(userName).getId();
         return getBalanceByAccountId(accountNumber);
     }
 
@@ -49,9 +47,9 @@ public class JdbcAccountDao implements AccountDao {
         }
     }
 
-    public Account getAccountByUserId(long userId) throws RuntimeException {
-        String sql = "SELECT * FROM accounts WHERE user_id = ?";
-        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, userId);
+    public Account getAccountByUserName(String userName) throws RuntimeException {
+        String sql = "SELECT * FROM accounts JOIN users ON accounts.user_id = (SELECT user_id FROM users WHERE username = ?)";
+        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, userName);
 
         if(result.next()) {
             return makeAccount(result);
@@ -69,7 +67,7 @@ public class JdbcAccountDao implements AccountDao {
             fromAccount.subtractAmount(amount);
             toAccount.addAmount(amount);
 
-            String sql = "UPDATE accounts SET balance = ? WHERE account_id = ?";
+            String sql = "UPDATE accounts SET balance = ? WHERE account_id = ?;";
             jdbcTemplate.update(sql, fromAccount.getBalance(), fromAccountId);
             jdbcTemplate.update(sql, toAccount.getBalance(), toAccountId);
         }

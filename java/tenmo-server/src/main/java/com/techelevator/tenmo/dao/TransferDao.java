@@ -9,7 +9,9 @@ import java.util.List;
 public interface TransferDao {
 
 
-    public BigDecimal send(Long sendingAccountId, Long receivingAccountId, BigDecimal amount);
+    public Transfer createTransfer(Transfer transfer);
+
+    public void send(Long sendingAccountId, Long receivingAccountId, BigDecimal amount);
 
     public List<Transfer> listTransfersByAccountId(long accountId);
 

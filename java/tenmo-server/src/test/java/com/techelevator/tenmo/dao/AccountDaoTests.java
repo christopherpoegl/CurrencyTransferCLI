@@ -35,10 +35,8 @@ public class AccountDaoTests extends TenmoDaoTests {
         userDao.create("user1", "password");
         userDao.create("user2", "password");
 
-        long fromUserId = userDao.findIdByUsername("user1");
-        long fromAccountId = accountDao.getAccountByUserId(fromUserId).getId();
-        long toUserId = userDao.findIdByUsername("user2");
-        long toAccountId = accountDao.getAccountByUserId(toUserId).getId();
+        long fromAccountId = accountDao.getAccountByUserName("user1").getId();
+        long toAccountId = accountDao.getAccountByUserName("user2").getId();
         accountDao.updateAccountBalances(fromAccountId, toAccountId, new BigDecimal("100.00"));
         BigDecimal user1Balance = accountDao.getBalanceByAccountId(fromAccountId);
         BigDecimal user2Balance = accountDao.getBalanceByAccountId(toAccountId);

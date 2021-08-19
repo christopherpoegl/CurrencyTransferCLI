@@ -5,14 +5,13 @@ import com.techelevator.tenmo.dao.AccountDao;
 import com.techelevator.tenmo.dao.TransferDao;
 
 import com.techelevator.tenmo.dao.UserDao;
+import com.techelevator.tenmo.model.Account;
+import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.List;
 
@@ -28,10 +27,9 @@ public class AccountController {
     @Autowired
     UserDao userDao;
 
-    @RequestMapping(path = "/balance", method = RequestMethod.GET)
-    public BigDecimal getBalance(Principal principal) {
-        String username = principal.getName();
-        return accountDao.getBalanceByUserName("user");
+    @RequestMapping(path = "", method = RequestMethod.GET)
+    public Account getAccount(Principal principal) {
+        return accountDao.getAccountByUserName(principal.getName());
     }
 
     @RequestMapping(path = "/users", method = RequestMethod.GET)
@@ -39,9 +37,16 @@ public class AccountController {
         return userDao.findAll();
     }
 
-    @RequestMapping(path = "/transfer/send", method = RequestMethod.POST)
-    public BigDecimal sendTransfer(Principal userSending, User userReceiving, BigDecimal amount){
-        return transferDao.send()
+    @RequestMapping(path = "/transfer", method = RequestMethod.POST)
+    public Transfer createTransfer(@RequestBody Transfer transfer) {
+        transfer = transferDao.createTransfer(transfer);
+        return transfer;
+    }
+
+    @RequestMapping(path = "/transfer", method = RequestMethod.GET)
+    public List<Transfer> listTransfers(Principal principal) {
+        long accountId = accountDao.getAccountByUserName(principal.getName()).getId();
+        return transferDao.listTransfersByAccountId(accountId);
     }
 
 
