@@ -33,6 +33,9 @@ public class AccountController {
         return accountDao.getAccountByUserName(principal.getName());
     }
 
+    @RequestMapping(path = "/balance/2", method = RequestMethod.GET)
+    public BigDecimal getBalance(Principal principal) {return accountDao.getBalanceByUserName(principal.getName());}
+
     @RequestMapping(path = "/users", method = RequestMethod.GET)
     public List<User> listUsers(){
         return userDao.findAll();

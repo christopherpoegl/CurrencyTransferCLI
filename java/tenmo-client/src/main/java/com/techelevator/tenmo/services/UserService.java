@@ -25,8 +25,7 @@ public class UserService {
 
     public BigDecimal getBalance() throws UserServiceException {
         try {
-            Account account = restTemplate.exchange(BASE_URL + "/balance", HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
-            return account.getBalance();
+            return restTemplate.exchange(BASE_URL + "/balance/2", HttpMethod.GET, makeAuthEntity(), BigDecimal.class).getBody();
         } catch (RestClientResponseException e) {
             throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
         }
