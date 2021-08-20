@@ -129,6 +129,11 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			System.out.println("Please provide a userId");
 			sendBucks();
 		}
+		/*try {
+			userService.justPrintADamnString();
+		} catch (UserServiceException e) {
+			System.out.println(e.getMessage());
+		}*/
 		
 	}
 

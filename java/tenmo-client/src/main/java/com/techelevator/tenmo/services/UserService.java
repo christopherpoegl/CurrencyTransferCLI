@@ -1,6 +1,5 @@
 package com.techelevator.tenmo.services;
 
-import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
 import org.springframework.http.HttpEntity;
@@ -10,8 +9,6 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 public class UserService {
 
@@ -44,22 +41,43 @@ public class UserService {
 
     public Transfer sendMoney(long sendingUserId, Long receivingUserId, BigDecimal amount) throws UserServiceException {
         Transfer transfer = new Transfer();
-        transfer.setTransfer_status_desc("Send");
-        transfer.setTransfer_type_desc("Approved");
+        transfer.setTransfer_status_desc("Approved");
+        transfer.setTransfer_type_desc("Send");
         transfer.setAccount_from(sendingUserId);
         transfer.setAccount_to(receivingUserId);
+        transfer.setTransfer_status_id(2);
+        transfer.setTransfer_type_id(2);
         transfer.setAmount(amount);
 
         try {
-            transfer = restTemplate.exchange("http://localhost:8080/account/transfer/send", HttpMethod.POST, makeTransferEntity(transfer), Transfer.class).getBody();
+            HttpEntity<Transfer> transferEntity = makeTransferEntity(transfer);
+            transferEntity = restTemplate.exchange("http://localhost:8080/account/transfer/send", HttpMethod.POST, transferEntity, Transfer.class);
         } catch (RestClientResponseException e) {
             throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
         }
         return transfer;
     }
 
+    public String justPrintADamnString() throws UserServiceException {
+        try {
+            HttpEntity<String> stringEntity = makeStringEntity("Hello World!");
+            restTemplate.exchange("http://localhost:8080/account/string", HttpMethod.POST, stringEntity, String.class);
+            return "Hello World!";
+        } catch (RestClientResponseException e) {
+            throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
+        }
+    }
 
-    private HttpEntity<Transfer> makeTransferEntity(Transfer transfer) {
+
+    private HttpEntity<String> makeStringEntity(String string) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(AUTH_TOKEN);
+        HttpEntity<String> entity = new HttpEntity<>(string, headers);
+        if (entity == null) System.out.println("Entity is Null");
+        return entity;
+    }
+
+        private HttpEntity<Transfer> makeTransferEntity(Transfer transfer) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(AUTH_TOKEN);
         HttpEntity<Transfer> entity = new HttpEntity<>(transfer, headers);

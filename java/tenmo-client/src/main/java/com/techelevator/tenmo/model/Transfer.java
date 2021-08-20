@@ -10,24 +10,8 @@ public class Transfer {
     private long account_from;
     private long account_to;
     private BigDecimal amount;
-
     private long transfer_type_id;
     private long transfer_status_id;
-
-
-
-    public Transfer(long transfer_id, String transfer_type_desc, String transfer_status_desc, long userId_from, long userId_to, BigDecimal amount) {
-        this.transfer_id = transfer_id;
-        this.transfer_type_desc = transfer_type_desc;
-        this.transfer_status_desc = transfer_status_desc;
-        this.account_from = userId_from;
-        this.account_to = userId_to;
-        this.amount = amount;
-
-    }
-
-    public Transfer(){
-    }
 
     public long getTransfer_id() {
         return transfer_id;
@@ -41,24 +25,24 @@ public class Transfer {
         return transfer_status_desc;
     }
 
+    public long getAccount_from() {
+        return account_from;
+    }
+
+    public long getAccount_to() {
+        return account_to;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
     public long getTransfer_type_id() {
         return transfer_type_id;
     }
 
     public long getTransfer_status_id() {
         return transfer_status_id;
-    }
-
-    public long getUserId_from() {
-        return account_from;
-    }
-
-    public long getUserId_to() {
-        return account_to;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
     }
 
     public void setTransfer_id(long transfer_id) {
@@ -73,12 +57,12 @@ public class Transfer {
         this.transfer_status_desc = transfer_status_desc;
     }
 
-    public void setAccount_from(long userId_from) {
-        this.account_from = userId_from;
+    public void setAccount_from(long account_from) {
+        this.account_from = account_from;
     }
 
-    public void setAccount_to(long userId_to) {
-        this.account_to = userId_to;
+    public void setAccount_to(long account_to) {
+        this.account_to = account_to;
     }
 
     public void setAmount(BigDecimal amount) {
@@ -89,6 +73,7 @@ public class Transfer {
         this.transfer_type_id = transfer_type_id;
     }
 
-    public void setTransfer_status_id(long transfer_status_id) {this.transfer_status_id = transfer_status_id;}
-
+    public void setTransfer_status_id(long transfer_status_id) {
+        this.transfer_status_id = transfer_status_id;
+    }
 }
