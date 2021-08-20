@@ -18,4 +18,6 @@ public interface TransferDao {
     public Transfer getTransferByTransferId (long transferId);
 
     public String getTypeDesc(long transferTypeId);
+
+    public String getStatusDesc(long transferStatusId);
 }

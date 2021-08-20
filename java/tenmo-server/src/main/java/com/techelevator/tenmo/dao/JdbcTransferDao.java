@@ -18,9 +18,7 @@ public class JdbcTransferDao implements TransferDao {
     public JdbcTransferDao(JdbcTemplate jdbcTemplate){this.jdbcTemplate = jdbcTemplate;}
 
     public Transfer createTransfer(Transfer transfer) {
-
-
-        if (transfer.getTransfer_type_desc() == "Send") send(transfer.getAccount_from(), transfer.getAccount_to(), transfer.getAmount());
+        if (transfer.getTransfer_type_desc().equals("Send")) send(transfer.getAccount_from(), transfer.getAccount_to(), transfer.getAmount());
         String sql = "INSERT INTO transfers (transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
                 "VALUES (?,?,?,?,?) RETURNING transfer_id";
         long transfer_id = jdbcTemplate.queryForObject(sql, Long.class, transfer.getTransfer_type_id(), transfer.getTransfer_status_id(), transfer.getAccount_from(), transfer.getAccount_to(), transfer.getAmount());
@@ -70,6 +68,16 @@ public class JdbcTransferDao implements TransferDao {
     public String getStatusDesc(long transferStatusId) {
         String sql = "SELECT transfer_status_desc FROM transfer_statuses WHERE transfer_status_id = ?;";
         return jdbcTemplate.queryForObject(sql, String.class, transferStatusId);
+    }
+
+    public long getStatusId(String transferStatusDesc) {
+        String sql = "SELECT transfer_status_id FROM transfer_statuses WHERE transfer_status_desc = ?;";
+        return jdbcTemplate.queryForObject(sql, Long.class, transferStatusDesc);
+    }
+
+    public long getTypeId(String transferTypeDesc) {
+        String sql = "SELECT transfer_type_id FROM transfer_types WHERE transfer_type_desc = ?;";
+        return jdbcTemplate.queryForObject(sql, Long.class, transferTypeDesc);
     }
 
     private Transfer mapRowToTransfer(SqlRowSet rs) {

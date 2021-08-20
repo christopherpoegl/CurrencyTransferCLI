@@ -1,6 +1,7 @@
 package com.techelevator.tenmo;
 
 import com.techelevator.tenmo.model.AuthenticatedUser;
+import com.techelevator.tenmo.model.User;
 import com.techelevator.tenmo.model.UserCredentials;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.AuthenticationServiceException;
@@ -11,6 +12,10 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Scanner;
 
 public class App {
 
@@ -81,7 +86,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	private void viewCurrentBalance() {
 
 		try {
-			System.out.println("Welcome " + currentUser.getUser().getUsername() + ".  Your account balance is " +userService.getBalance()+ ".");
+			System.out.println("Your current account balance is: $" +userService.getBalance());
 		} catch (UserServiceException e) {
 			System.out.println(e.getMessage());
 		}
@@ -101,7 +106,29 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 
 	private void sendBucks() {
-		// TODO Auto-generated method stub
+		try {
+			System.out.println("-------------------------------------------\n" +
+					"Users\n" +
+					"ID          Name\n" +
+					"-------------------------------------------");
+			User[] users = userService.getUsers();
+			for (User user : users) {
+				System.out.println(user.getId() + "        " +user.getUsername());
+			}
+			System.out.print("----------\n\n" +
+					"Enter ID of user you are sending to (0 to cancel): ");
+			Scanner inputScanner = new Scanner(System.in);
+			long receivingId = Long.parseLong(inputScanner.nextLine());
+
+			System.out.print("Enter amount: ");
+			BigDecimal amount = new BigDecimal(inputScanner.nextLine());
+			userService.sendMoney(currentUser.getUser().getId(), receivingId, amount);
+		} catch (UserServiceException e) {
+			System.out.println(e.getMessage());
+		} catch (NumberFormatException e) {
+			System.out.println("Please provide a userId");
+			sendBucks();
+		}
 		
 	}
 

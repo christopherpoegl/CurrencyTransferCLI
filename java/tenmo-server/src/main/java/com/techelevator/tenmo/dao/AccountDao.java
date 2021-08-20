@@ -12,7 +12,7 @@ public interface AccountDao {
 
     public Account getAccountById(long id);
 
-    //public Account getAccountByUserId(long userId);
+    public long getAccountIdByUserId(long userId);
 
     public Account getAccountByUserName(String userName);
 

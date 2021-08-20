@@ -29,11 +29,6 @@ public class AccountController {
     UserDao userDao;
 
     @RequestMapping(path = "/balance", method = RequestMethod.GET)
-    public Account getAccount(Principal principal) {
-        return accountDao.getAccountByUserName(principal.getName());
-    }
-
-    @RequestMapping(path = "/balance/2", method = RequestMethod.GET)
     public BigDecimal getBalance(Principal principal) {return accountDao.getBalanceByUserName(principal.getName());}
 
     @RequestMapping(path = "/users", method = RequestMethod.GET)
@@ -41,15 +36,20 @@ public class AccountController {
         return userDao.findAll();
     }
 
-    @RequestMapping(path = "/transfer", method = RequestMethod.POST)
+    @RequestMapping(path = "/transfer/send", method = RequestMethod.POST)
     public Transfer createTransfer(@RequestBody Transfer transfer) {
+        long accountNo = accountDao.getAccountIdByUserId(transfer.getAccount_from());
+        transfer.setAccount_from(accountNo);
+        accountNo = accountDao.getAccountIdByUserId(transfer.getAccount_to());
+        transfer.setAccount_to(accountNo);
         transfer = transferDao.createTransfer(transfer);
         return transfer;
     }
 
     @RequestMapping(path = "/transfer", method = RequestMethod.GET)
     public List<Transfer> listTransfers(Principal principal) {
-        long accountId = accountDao.getAccountByUserName(principal.getName()).getId();
+        Account account = accountDao.getAccountByUserName(principal.getName());
+        long accountId = account.getId();
         return transferDao.listTransfersByAccountId(accountId);
     }
 

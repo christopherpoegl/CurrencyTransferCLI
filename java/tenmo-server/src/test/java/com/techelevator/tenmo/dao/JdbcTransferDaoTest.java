@@ -36,18 +36,30 @@ public class JdbcTransferDaoTest extends TenmoDaoTests {
         Transfer transfer = new Transfer();
         transfer.setTransfer_status_id(2);
         transfer.setTransfer_type_id(2);
+        transfer.setTransfer_status_desc(transferDao.getStatusDesc(2));
+        transfer.setTransfer_type_desc(transferDao.getTypeDesc(2));
         transfer.setAccount_from(accountDao.getAccountByUserName("user1").getId());
         transfer.setAccount_to(accountDao.getAccountByUserName("user2").getId());
         transfer.setAmount(new BigDecimal("100.00"));
 
-        transfer = transferDao.createTransfer(transfer);
-        BigDecimal actualTransferValue = transfer.getAmount();
+        Transfer completedTransfer = transferDao.createTransfer(transfer);
+        BigDecimal actualTransferValue = completedTransfer.getAmount();
         BigDecimal actualAccount1Balance = accountDao.getAccountByUserName("user1").getBalance();
         BigDecimal actualAccount2Balance = accountDao.getAccountByUserName("user2").getBalance();
 
         Assert.assertTrue(""+actualTransferValue, actualTransferValue.equals(new BigDecimal("100.00").setScale(2, RoundingMode.HALF_UP)));
         Assert.assertTrue(""+actualAccount1Balance, actualAccount1Balance.equals(new BigDecimal("900.00").setScale(2, RoundingMode.HALF_UP)));
         Assert.assertTrue(""+actualAccount2Balance, actualAccount2Balance.equals(new BigDecimal("1100.00").setScale(2, RoundingMode.HALF_UP)));
+    }
+
+    @Test
+    public void getStatusDesc_2_returns_approved() {
+        Assert.assertEquals("Approved", transferDao.getStatusDesc(2));
+    }
+
+    @Test
+    public void getTypeDesc_2_returns_send() {
+        Assert.assertEquals("Send", transferDao.getTypeDesc(2));
     }
 
     @Test
@@ -64,7 +76,9 @@ public class JdbcTransferDaoTest extends TenmoDaoTests {
 
         Transfer transfer = new Transfer();
         transfer.setTransfer_status_id(2);
+        transfer.setTransfer_status_desc(transferDao.getStatusDesc(2));
         transfer.setTransfer_type_id(2);
+        transfer.setTransfer_type_desc(transferDao.getTypeDesc(2));
         transfer.setAccount_from(accountDao.getAccountByUserName("user1").getId());
         transfer.setAccount_to(accountDao.getAccountByUserName("user2").getId());
         transfer.setAmount(new BigDecimal("100.00"));
@@ -84,7 +98,9 @@ public class JdbcTransferDaoTest extends TenmoDaoTests {
 
         Transfer transfer = new Transfer();
         transfer.setTransfer_status_id(2);
+        transfer.setTransfer_status_desc(transferDao.getStatusDesc(2));
         transfer.setTransfer_type_id(2);
+        transfer.setTransfer_type_desc(transferDao.getTypeDesc(2));
         transfer.setAccount_from(accountDao.getAccountByUserName("user1").getId());
         transfer.setAccount_to(accountDao.getAccountByUserName("user2").getId());
         transfer.setAmount(new BigDecimal("100.00"));

@@ -33,7 +33,18 @@ public class JdbcAccountDao implements AccountDao {
         long accountNumber = getAccountByUserName(userName).getId();
         return getBalanceByAccountId(accountNumber);
     }
-
+    public long getAccountIdByUserId(long userId) throws RuntimeException {
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA " + userId);
+        String sql = "SELECT account_id FROM accounts WHERE user_id = ?";
+        return  jdbcTemplate.queryForObject(sql, Long.class, userId);
+        /*if (result.next()) {
+            return makeAccount(result);
+        }
+        else {
+            System.out.println("Oh no we didn't get the Account!");
+            throw new RuntimeException();
+        }*/
+    }
     public Account getAccountById(long id) throws RuntimeException {
         String sql = "SELECT * FROM accounts WHERE account_id = ?";
         SqlRowSet result = jdbcTemplate.queryForRowSet(sql, id);

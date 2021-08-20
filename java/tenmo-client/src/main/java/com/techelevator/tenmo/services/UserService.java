@@ -1,6 +1,8 @@
 package com.techelevator.tenmo.services;
 
 import com.techelevator.tenmo.model.Account;
+import com.techelevator.tenmo.model.Transfer;
+import com.techelevator.tenmo.model.User;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -8,6 +10,8 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserService {
 
@@ -19,25 +23,49 @@ public class UserService {
         BASE_URL = url+"account";
     }
 
-    public void setAuthToken(String token) {
-        AUTH_TOKEN = token;
-    }
+    public void setAuthToken(String token) { AUTH_TOKEN = token; }
 
     public BigDecimal getBalance() throws UserServiceException {
         try {
-            return restTemplate.exchange(BASE_URL + "/balance/2", HttpMethod.GET, makeAuthEntity(), BigDecimal.class).getBody();
+            return restTemplate.exchange(BASE_URL + "/balance", HttpMethod.GET, makeAuthEntity(), BigDecimal.class).getBody();
         } catch (RestClientResponseException e) {
             throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
         }
     }
 
-    /*public List<User> getUsers() throws UserServiceException {
-        List<User> users = new ArrayList<>();
+    public User[] getUsers() throws UserServiceException {
+        User[] users = null;
         try {
-
+            return restTemplate.exchange(BASE_URL + "/users", HttpMethod.GET, makeAuthEntity(), User[].class).getBody();
+        } catch (RestClientResponseException e) {
+            throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
         }
+    }
 
-    }*/
+    public Transfer sendMoney(long sendingUserId, Long receivingUserId, BigDecimal amount) throws UserServiceException {
+        Transfer transfer = new Transfer();
+        transfer.setTransfer_status_desc("Send");
+        transfer.setTransfer_type_desc("Approved");
+        transfer.setAccount_from(sendingUserId);
+        transfer.setAccount_to(receivingUserId);
+        transfer.setAmount(amount);
+
+        try {
+            transfer = restTemplate.exchange("http://localhost:8080/account/transfer/send", HttpMethod.POST, makeTransferEntity(transfer), Transfer.class).getBody();
+        } catch (RestClientResponseException e) {
+            throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
+        }
+        return transfer;
+    }
+
+
+    private HttpEntity<Transfer> makeTransferEntity(Transfer transfer) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(AUTH_TOKEN);
+        HttpEntity<Transfer> entity = new HttpEntity<>(transfer, headers);
+        if (entity == null) System.out.println("Entity is Null");
+        return entity;
+    }
 
     private HttpEntity makeAuthEntity() {
         HttpHeaders headers = new HttpHeaders();
