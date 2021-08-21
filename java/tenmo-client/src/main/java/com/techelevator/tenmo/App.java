@@ -67,7 +67,11 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			if(MAIN_MENU_OPTION_VIEW_BALANCE.equals(choice)) {
 				viewCurrentBalance();
 			} else if(MAIN_MENU_OPTION_VIEW_PAST_TRANSFERS.equals(choice)) {
-				viewTransferHistory();
+				try {
+					viewTransferHistory();
+				} catch (UserServiceException e) {
+					e.printStackTrace();
+				}
 			} else if(MAIN_MENU_OPTION_VIEW_PENDING_REQUESTS.equals(choice)) {
 				viewPendingRequests();
 			} else if(MAIN_MENU_OPTION_SEND_BUCKS.equals(choice)) {
@@ -95,10 +99,32 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		
 	}
 
-	private void viewTransferHistory() {
+	private void viewTransferHistory() throws UserServiceException {
 		// TODO Auto-generated method stub
-		
-	}
+		try {
+		for(int i=0; i<userService.listTransfers().length; i++) {
+			long tid = userService.listTransfers()[i].getTransfer_id();
+			long taid = userService.listTransfers()[i].getAccount_from();
+
+		}
+
+		} catch (UserServiceException e) {
+			System.out.println(e.getMessage());
+		}
+
+		System.out.println("-------------------------------------------\n" +
+				"Transfers\n" +
+				"ID          From/To                 Amount\n" +
+				"-------------------------------------------\n" +
+
+
+				userService.listTransfers()+"          From: Bernice          $ 903.14\n" +
+				"79          To:    Larry           $  12.55\n" +
+				"---------\n" +
+				"Please enter transfer ID to view details (0 to cancel): \"\n" +
+				"```");
+
+    }
 
 	private void viewPendingRequests() {
 		// TODO Auto-generated method stub

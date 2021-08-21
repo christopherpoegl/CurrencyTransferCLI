@@ -29,6 +29,23 @@ public class UserService {
             throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
         }
     }
+    public User getUserNameByAccountId(long accountId) throws UserServiceException {
+        try {
+            return restTemplate.exchange(BASE_URL + "/balance", HttpMethod.GET, makeAuthEntity(), User.class).getBody();
+        } catch (RestClientResponseException e) {
+            throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
+        }
+    }
+
+    public Transfer[] listTransfers() throws UserServiceException {
+        Transfer[] transfers = null;
+        try {
+            return restTemplate.exchange(BASE_URL + "/transfer", HttpMethod.GET, makeAuthEntity(), Transfer[].class).getBody();
+        } catch (RestClientResponseException e) {
+            throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
+        }
+    }
+
 
     public User[] getUsers() throws UserServiceException {
         User[] users = null;

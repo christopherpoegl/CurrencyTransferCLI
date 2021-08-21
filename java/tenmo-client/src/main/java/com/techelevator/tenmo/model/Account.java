@@ -11,4 +11,6 @@ public class Account {
     public BigDecimal getBalance() {
         return balance;
     }
+    public long getUserId(){return userId;}
 }
+

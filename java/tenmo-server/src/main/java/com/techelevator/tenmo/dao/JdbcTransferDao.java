@@ -38,7 +38,7 @@ public class JdbcTransferDao implements TransferDao {
 
     public List<Transfer> listTransfersByAccountId(long accountId){
         List<Transfer> transfers = new ArrayList<>();
-        String sql = "select transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount FROM transfers " +
+        String sql = "SELECT transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount FROM transfers " +
                 "JOIN accounts ON account_from = accounts.account_id OR account_to = accounts.account_id " +
                 "WHERE account_id = ?;";
         SqlRowSet results = jdbcTemplate.queryForRowSet(sql, accountId);

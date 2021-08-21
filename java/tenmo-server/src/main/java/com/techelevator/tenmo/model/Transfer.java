@@ -14,6 +14,11 @@ public class Transfer {
     private long transfer_type_id;
     private long transfer_status_id;
 
+    private String account_from_name;
+    private String account_to_name;
+
+
+
 
 
     public Transfer(long transfer_id, String transfer_type_desc, String transfer_status_desc, long account_from, long account_to, BigDecimal amount) {
@@ -23,6 +28,7 @@ public class Transfer {
         this.account_from = account_from;
         this.account_to = account_to;
         this.amount = amount;
+
 
     }
 
@@ -91,4 +97,22 @@ public class Transfer {
 
     public void setTransfer_status_id(long transfer_status_id) {this.transfer_status_id = transfer_status_id;}
 
+    //================================================================================================================
+
+
+    public String getAccount_from_name() {
+        return account_from_name;
+    }
+
+    public void setAccount_from_name(String account_from_name) {
+        this.account_from_name = account_from_name;
+    }
+
+    public String getAccount_to_name() {
+        return account_to_name;
+    }
+
+    public void setAccount_to_name(String account_to_name) {
+        this.account_to_name = account_to_name;
+    }
 }
