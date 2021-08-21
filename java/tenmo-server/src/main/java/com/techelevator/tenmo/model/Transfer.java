@@ -14,10 +14,6 @@ public class Transfer {
     private long transfer_type_id;
     private long transfer_status_id;
 
-    private String account_from_name;
-    private String account_to_name;
-
-
 
 
 
@@ -100,19 +96,5 @@ public class Transfer {
     //================================================================================================================
 
 
-    public String getAccount_from_name() {
-        return account_from_name;
-    }
 
-    public void setAccount_from_name(String account_from_name) {
-        this.account_from_name = account_from_name;
-    }
-
-    public String getAccount_to_name() {
-        return account_to_name;
-    }
-
-    public void setAccount_to_name(String account_to_name) {
-        this.account_to_name = account_to_name;
-    }
 }

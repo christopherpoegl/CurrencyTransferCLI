@@ -21,7 +21,6 @@ public class JdbcTransferDao implements TransferDao {
     public JdbcTransferDao(JdbcTemplate jdbcTemplate){this.jdbcTemplate = jdbcTemplate;}
 
     public Transfer createTransfer(Transfer transfer) {
-        System.out.println();
         if (transfer.getTransfer_type_desc().equals("Send")) send(transfer.getAccount_from(), transfer.getAccount_to(), transfer.getAmount());
         String sql = "INSERT INTO transfers (transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
                 "VALUES (?,?,?,?,?) RETURNING transfer_id";

@@ -5,9 +5,11 @@ import com.techelevator.tenmo.dao.AccountDao;
 import com.techelevator.tenmo.dao.TransferDao;
 
 import com.techelevator.tenmo.dao.UserDao;
+import com.techelevator.tenmo.dao.UserTransferDao;
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
+import com.techelevator.tenmo.model.UserTransfer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +19,7 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
-//@PreAuthorize("isAuthenticated()")
+@PreAuthorize("isAuthenticated()")
 @RequestMapping(path = "/account")
 public class AccountController {
 
@@ -27,6 +29,8 @@ public class AccountController {
     TransferDao transferDao;
     @Autowired
     UserDao userDao;
+    @Autowired
+    UserTransferDao userTransferDao;
 
     @RequestMapping(path = "/balance", method = RequestMethod.GET)
     public BigDecimal getBalance(Principal principal) {return accountDao.getBalanceByUserName(principal.getName());}
@@ -48,29 +52,18 @@ public class AccountController {
         transfer.setAccount_to(accountNo);
         transfer = transferDao.createTransfer(transfer);
         return transfer;
-        /*Transfer testTransfer = new Transfer();
-        testTransfer.setAccount_from(accountDao.getAccountIdByUserId(1002));
-        System.out.println("Send Account is: "+ testTransfer.getAccount_from());
-        testTransfer.setAccount_to(accountDao.getAccountIdByUserId(1001));
-        System.out.println("To Account is: "+ testTransfer.getAccount_to());
-        testTransfer.setAmount(new BigDecimal("100.00"));
-        testTransfer.setTransfer_status_desc("Approved");
-        testTransfer.setTransfer_status_id(2);
-        testTransfer.setTransfer_type_desc("Send");
-        testTransfer.setTransfer_type_id(2);
-        testTransfer = transferDao.createTransfer(testTransfer);*/
     }
 
     @RequestMapping(path = "/transfer", method = RequestMethod.GET)
-    public List<Transfer> listTransfers(Principal principal) {
+    public List<UserTransfer> listTransfers(Principal principal) {
         Account account = accountDao.getAccountByUserName(principal.getName());
         long accountId = account.getId();
-        return transferDao.listTransfersByAccountId(accountId);
+        return userTransferDao.getUserTransferList(accountId);
     }
 
-    @RequestMapping(path = "/string", method = RequestMethod.POST)
-    public void printString(@RequestBody String strung) {
-        System.out.println(strung);
+    @RequestMapping(path = "/transfer/{id}", method = RequestMethod.GET)
+    public Transfer transfer(@PathVariable("id") long id) {
+        return transferDao.getTransferByTransferId(id);
     }
 
 }

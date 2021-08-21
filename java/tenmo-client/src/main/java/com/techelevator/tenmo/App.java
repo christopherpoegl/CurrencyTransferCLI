@@ -1,8 +1,6 @@
 package com.techelevator.tenmo;
 
-import com.techelevator.tenmo.model.AuthenticatedUser;
-import com.techelevator.tenmo.model.User;
-import com.techelevator.tenmo.model.UserCredentials;
+import com.techelevator.tenmo.model.*;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.AuthenticationServiceException;
 import com.techelevator.tenmo.services.UserService;
@@ -100,29 +98,62 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 
 	private void viewTransferHistory() throws UserServiceException {
-		// TODO Auto-generated method stub
+		UserTransfer[] userTransfers = null;
+
 		try {
-		for(int i=0; i<userService.listTransfers().length; i++) {
-			long tid = userService.listTransfers()[i].getTransfer_id();
-			long taid = userService.listTransfers()[i].getAccount_from();
-
-		}
-
+			userTransfers = userService.listTransfers();
 		} catch (UserServiceException e) {
 			System.out.println(e.getMessage());
 		}
 
-		System.out.println("-------------------------------------------\n" +
+			System.out.println("-------------------------------------------\n" +
 				"Transfers\n" +
-				"ID          From/To                 Amount\n" +
-				"-------------------------------------------\n" +
+				"ID\t\t\tFrom/To  \t\t\tAmount\n" +
+				"-------------------------------------------\n");
+		for(UserTransfer userTransfer : userTransfers) {
+			System.out.print(userTransfer.getTransferId() + "        ");
+			if (userTransfer.getAccountFromUserName().equals(currentUser.getUser().getUsername())) {
+				if (userTransfer.getAccountToUsername().length() < 4)
+					System.out.print("To:    " + userTransfer.getAccountToUsername() + "\t\t\t$");
+				else System.out.print("To:    " + userTransfer.getAccountToUsername() + "\t\t$");
+			} else {
+				if (userTransfer.getAccountFromUserName().length() < 4) {
+					System.out.print("From:  " + userTransfer.getAccountFromUserName() + "\t\t\t$");
+				}
+				else System.out.print("From:  " + userTransfer.getAccountFromUserName() + "\t\t$");
 
-
-				userService.listTransfers()+"          From: Bernice          $ 903.14\n" +
-				"79          To:    Larry           $  12.55\n" +
-				"---------\n" +
-				"Please enter transfer ID to view details (0 to cancel): \"\n" +
-				"```");
+			}
+			System.out.println(userTransfer.getAmount());
+		}
+		boolean isGoodInput = false;
+		while (!isGoodInput) {
+			System.out.print("Please enter transfer ID to view details (0 to cancel): ");
+			Scanner inputScanner = new Scanner(System.in);
+			try {
+				long transferId = Long.parseLong(inputScanner.nextLine());
+				Transfer transfer = userService.getTransferById(transferId);
+				String fromUser = "";
+				String toUser = "";
+				for (UserTransfer userTransfer : userTransfers) {
+					if (userTransfer.getTransferId() == transferId) {
+						fromUser = userTransfer.getAccountFromUserName();
+						toUser = userTransfer.getAccountToUsername();
+					}
+				}
+				System.out.println("--------------------------------------------\n" +
+						"Transfer Details\n" +
+						"--------------------------------------------");
+				System.out.println("Id: " + transfer.getTransfer_id());
+				System.out.println("From: " + fromUser);
+				System.out.println("To: " + toUser);
+				System.out.println("Type: " + transfer.getTransfer_type_desc());
+				System.out.println("Status: " + transfer.getTransfer_status_desc());
+				System.out.println("Amount: $" + transfer.getAmount());
+				isGoodInput = true;
+			} catch (NumberFormatException e) {
+				System.out.println("Please enter a valid transfer ID");
+			}
+		}
 
     }
 
@@ -132,35 +163,32 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 
 	private void sendBucks() {
-		try {
-			System.out.println("-------------------------------------------\n" +
-					"Users\n" +
-					"ID          Name\n" +
-					"-------------------------------------------");
-			User[] users = userService.getUsers();
-			for (User user : users) {
-				System.out.println(user.getId() + "        " +user.getUsername());
-			}
-			System.out.print("----------\n\n" +
-					"Enter ID of user you are sending to (0 to cancel): ");
-			Scanner inputScanner = new Scanner(System.in);
-			long receivingId = Long.parseLong(inputScanner.nextLine());
+		boolean isGoodInput = false;
+		while (!isGoodInput) {
+			try {
+				System.out.println("-------------------------------------------\n" +
+						"Users\n" +
+						"ID          Name\n" +
+						"-------------------------------------------");
+				User[] users = userService.getUsers();
+				for (User user : users) {
+					System.out.println(user.getId() + "        " + user.getUsername());
+				}
+				System.out.print("----------\n\n" +
+						"Enter ID of user you are sending to (0 to cancel): ");
+				Scanner inputScanner = new Scanner(System.in);
+				long receivingId = Long.parseLong(inputScanner.nextLine());
 
-			System.out.print("Enter amount: ");
-			BigDecimal amount = new BigDecimal(inputScanner.nextLine());
-			userService.sendMoney(currentUser.getUser().getId(), receivingId, amount);
-		} catch (UserServiceException e) {
-			System.out.println(e.getMessage());
-		} catch (NumberFormatException e) {
-			System.out.println("Please provide a userId");
-			sendBucks();
+				System.out.print("Enter amount: ");
+				BigDecimal amount = new BigDecimal(inputScanner.nextLine());
+				userService.sendMoney(currentUser.getUser().getId(), receivingId, amount);
+				isGoodInput = true;
+			} catch (UserServiceException e) {
+				System.out.println(e.getMessage());
+			} catch (NumberFormatException e) {
+				System.out.println("Please provide a userId");
+			}
 		}
-		/*try {
-			userService.justPrintADamnString();
-		} catch (UserServiceException e) {
-			System.out.println(e.getMessage());
-		}*/
-		
 	}
 
 	private void requestBucks() {

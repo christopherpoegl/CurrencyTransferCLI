@@ -2,6 +2,7 @@ package com.techelevator.tenmo.services;
 
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
+import com.techelevator.tenmo.model.UserTransfer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -29,18 +30,19 @@ public class UserService {
             throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
         }
     }
-    public User getUserNameByAccountId(long accountId) throws UserServiceException {
+
+    public UserTransfer[] listTransfers() throws UserServiceException {
+        UserTransfer[] userTransfers = null;
         try {
-            return restTemplate.exchange(BASE_URL + "/balance", HttpMethod.GET, makeAuthEntity(), User.class).getBody();
+            return restTemplate.exchange(BASE_URL + "/transfer", HttpMethod.GET, makeAuthEntity(), UserTransfer[].class).getBody();
         } catch (RestClientResponseException e) {
             throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
         }
     }
 
-    public Transfer[] listTransfers() throws UserServiceException {
-        Transfer[] transfers = null;
+    public Transfer getTransferById(long id) throws UserServiceException {
         try {
-            return restTemplate.exchange(BASE_URL + "/transfer", HttpMethod.GET, makeAuthEntity(), Transfer[].class).getBody();
+            return restTemplate.exchange(BASE_URL + "/transfer/" + id, HttpMethod.GET, makeAuthEntity(), Transfer.class).getBody();
         } catch (RestClientResponseException e) {
             throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
         }
@@ -74,17 +76,6 @@ public class UserService {
         }
         return transfer;
     }
-
-    public String justPrintADamnString() throws UserServiceException {
-        try {
-            HttpEntity<String> stringEntity = makeStringEntity("Hello World!");
-            restTemplate.exchange("http://localhost:8080/account/string", HttpMethod.POST, stringEntity, String.class);
-            return "Hello World!";
-        } catch (RestClientResponseException e) {
-            throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
-        }
-    }
-
 
     private HttpEntity<String> makeStringEntity(String string) {
         HttpHeaders headers = new HttpHeaders();
