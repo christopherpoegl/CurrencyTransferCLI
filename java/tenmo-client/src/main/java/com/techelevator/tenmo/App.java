@@ -147,6 +147,9 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 						toUser = userTransfer.getAccountToUsername();
 					}
 				}
+				if (transfer == null) throw new UserServiceException("No message");
+				if (fromUser == null) throw new UserServiceException("No message");
+				if (toUser == null) throw new UserServiceException("No message");
 				System.out.println("--------------------------------------------\n" +
 						"Transfer Details\n" +
 						"--------------------------------------------");
@@ -159,6 +162,12 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				isGoodInput = true;
 			} catch (NumberFormatException e) {
 				System.out.println("Please enter a valid transfer ID");
+			} catch (UserServiceException e) {
+				if (e.getMessage().contains("No message")) System.out.println("Please enter a valid transfer ID");
+				else {
+					System.out.println(e.getMessage());
+					mainMenu();
+				}
 			}
 		}
 
@@ -181,7 +190,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				"-------------------------------------------\n");
 		for (UserTransfer userTransfer : userTransfers) {
 			System.out.print(userTransfer.getTransferId() + "        ");
-			if (userTransfer.getAccountFromUserName().equals(currentUser.getUser().getUsername())) {
+			if (userTransfer.getAccountToUsername().equals(currentUser.getUser().getUsername())) {
 				if (userTransfer.getAccountToUsername().length() < 4)
 					System.out.print("To:    " + userTransfer.getAccountToUsername() + "\t\t\t$");
 				else System.out.print("To:    " + userTransfer.getAccountToUsername() + "\t\t$");
@@ -204,14 +213,17 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 					mainMenu();
 				}
 				Transfer transfer = userService.getTransferById(transferId);
-				String fromUser = "";
-				String toUser = "";
+				String fromUser = null;
+				String toUser = null;
 				for (UserTransfer userTransfer : userTransfers) {
 					if (userTransfer.getTransferId() == transferId) {
 						fromUser = userTransfer.getAccountFromUserName();
 						toUser = userTransfer.getAccountToUsername();
 					}
 				}
+				if (fromUser == null) throw new UserServiceException("No message");
+				if (toUser == null) throw new UserServiceException("No message");
+
 				System.out.println("--------------------------------------------\n" +
 						"Transfer Details\n" +
 						"--------------------------------------------");
@@ -224,9 +236,18 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				isFirstGoodInput = true;
 			} catch (NumberFormatException e) {
 				System.out.println("Please enter a valid transfer ID");
+			} catch (UserServiceException e) {
+				if (e.getMessage().contains("No message")){
+			System.out.println("Please enter a valid transfer ID");
+				continue;
+			}
+				else {
+					System.out.println(e.getMessage());
+					mainMenu();
+				}
 			}
 			while (!isSecondGoodInput) {
-				System.out.print("Would you like to accept or reject this pending transfer (1)Exit (2)Accept (3)Reject");
+				System.out.print("Would you like to accept or reject this pending transfer (1)Exit (2)Accept (3)Reject: ");
 				try {
 					String info;
 					String statusId = inputScanner.nextLine();
@@ -240,10 +261,19 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 						userService.setStatusId(info);
 						isSecondGoodInput = true;
 					}
-					else mainMenu();
-					isSecondGoodInput  = true;
+					else if (statusId.equals("1")) {
+						mainMenu();
+						isSecondGoodInput = true;
+					}
 				} catch (NumberFormatException e) {
 					System.out.println("Please enter a valid choice.");
+				} catch (UserServiceException e) {
+					System.out.println(e.getMessage());
+					if (e.getMessage().contains("No message")) System.out.println("Please enter a valid choice");
+					else {
+						System.out.println(e.getMessage());
+						mainMenu();
+					}
 				}
 			}
 
@@ -274,7 +304,11 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				userService.sendMoney(currentUser.getUser().getId(), receivingId, amount, Long.valueOf(2));
 				isGoodInput = true;
 			} catch (UserServiceException e) {
-				System.out.println(e.getMessage());
+				if (e.getMessage().contains("No message")) System.out.println("Please provide a userId");
+				else {
+					System.out.println(e.getMessage());
+					mainMenu();
+				}
 			} catch (NumberFormatException e) {
 				System.out.println("Please provide a userId");
 			}
@@ -305,7 +339,11 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				userService.sendMoney(currentUser.getUser().getId(), receivingId, amount, Long.valueOf(1));
 				isGoodInput = true;
 			} catch (UserServiceException e) {
-				System.out.println(e.getMessage());
+				if (e.getMessage().contains("No message")) System.out.println("Please provide a userId");
+				else {
+					System.out.println(e.getMessage());
+					mainMenu();
+				}
 			} catch (NumberFormatException e) {
 				System.out.println("Please provide a userId");
 			}
