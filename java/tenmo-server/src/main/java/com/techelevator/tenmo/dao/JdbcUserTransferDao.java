@@ -53,6 +53,15 @@ public class JdbcUserTransferDao implements UserTransferDao {
         return userTransfers;
     }
 
+    public List<UserTransfer> getPendingUserTransferList(long accountId) {
+        List<UserTransfer> userTransfers = new ArrayList<>();
+        List<Transfer> transfers = transferDao.listPendingTransfersByAccountId(accountId);
+        for (Transfer transfer : transfers) {
+            userTransfers.add(getUserTransferInfo(transfer.getTransfer_id()));
+        }
+        return userTransfers;
+    }
+
     public UserTransfer mapRowsToUserTransfer(SqlRowSet rowSetFrom, SqlRowSet rowSetTo) {
         UserTransfer userTransfer = new UserTransfer();
         userTransfer.setTransferId(rowSetFrom.getLong("transfer_id"));

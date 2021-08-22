@@ -54,11 +54,29 @@ public class AccountController {
         return transfer;
     }
 
-    @RequestMapping(path = "/transfer", method = RequestMethod.GET)
+    @RequestMapping(path = "/transfer/setStatus", method = RequestMethod.POST)
+    public String setStatusId(@RequestBody String statusId){
+        String[] info = statusId.split(",");
+        long sId = Long.parseLong(info[0]);
+        long tId = Long.parseLong(info[1]);
+        System.out.println(statusId);
+        System.out.println(info[0]);
+        System.out.println(info[1]);
+        return transferDao.setTransferStatusId(sId, tId);
+    }
+
+    @RequestMapping(path = "/transfers/list", method = RequestMethod.GET)
     public List<UserTransfer> listTransfers(Principal principal) {
         Account account = accountDao.getAccountByUserName(principal.getName());
         long accountId = account.getId();
         return userTransferDao.getUserTransferList(accountId);
+    }
+
+    @RequestMapping(path = "/transfers/pending", method = RequestMethod.GET)
+    public List<UserTransfer> listPendingTransfers(Principal principal) {
+        Account account = accountDao.getAccountByUserName(principal.getName());
+        long accountId = account.getId();
+        return userTransferDao.getPendingUserTransferList(accountId);
     }
 
     @RequestMapping(path = "/transfer/{id}", method = RequestMethod.GET)

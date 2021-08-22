@@ -12,4 +12,6 @@ public interface UserTransferDao {
 
     List<UserTransfer> getUserTransferList(long accountId);
 
+    List<UserTransfer> getPendingUserTransferList(long accountId);
+
 }

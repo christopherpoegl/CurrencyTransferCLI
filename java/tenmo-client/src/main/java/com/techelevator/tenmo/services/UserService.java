@@ -34,7 +34,16 @@ public class UserService {
     public UserTransfer[] listTransfers() throws UserServiceException {
         UserTransfer[] userTransfers = null;
         try {
-            return restTemplate.exchange(BASE_URL + "/transfer", HttpMethod.GET, makeAuthEntity(), UserTransfer[].class).getBody();
+            return restTemplate.exchange(BASE_URL + "/transfers/list", HttpMethod.GET, makeAuthEntity(), UserTransfer[].class).getBody();
+        } catch (RestClientResponseException e) {
+            throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
+        }
+    }
+
+    public UserTransfer[] listPendingTransfers() throws UserServiceException {
+        UserTransfer[] PendingUserTransfers = null;
+        try {
+            return restTemplate.exchange(BASE_URL + "/transfers/pending", HttpMethod.GET, makeAuthEntity(), UserTransfer[].class).getBody();
         } catch (RestClientResponseException e) {
             throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
         }
@@ -58,14 +67,16 @@ public class UserService {
         }
     }
 
-    public Transfer sendMoney(long sendingUserId, Long receivingUserId, BigDecimal amount) throws UserServiceException {
+    public Transfer sendMoney(long sendingUserId, Long receivingUserId, BigDecimal amount, Long transferTypeId) throws UserServiceException {
+
+
         Transfer transfer = new Transfer();
-        transfer.setTransfer_status_desc("Approved");
+        transfer.setTransfer_status_desc("Pending");
         transfer.setTransfer_type_desc("Send");
         transfer.setAccount_from(sendingUserId);
         transfer.setAccount_to(receivingUserId);
-        transfer.setTransfer_status_id(2);
-        transfer.setTransfer_type_id(2);
+        transfer.setTransfer_status_id(1);
+        transfer.setTransfer_type_id(transferTypeId);
         transfer.setAmount(amount);
 
         try {
@@ -76,8 +87,17 @@ public class UserService {
         }
         return transfer;
     }
+    public String setStatusId(String statusId) throws UserServiceException {
+        try {
+            HttpEntity<String> stringEntity = makeStatusId(statusId);
+            stringEntity = restTemplate.exchange("http://localhost:8080/account/transfer/setStatus", HttpMethod.POST, stringEntity, String.class);
+        } catch (RestClientResponseException e) {
+            throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
+        }
+        return statusId;
+    }
 
-    private HttpEntity<String> makeStringEntity(String string) {
+    private HttpEntity<String> makeStatusId(String string) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(AUTH_TOKEN);
         HttpEntity<String> entity = new HttpEntity<>(string, headers);

@@ -71,7 +71,11 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 					e.printStackTrace();
 				}
 			} else if(MAIN_MENU_OPTION_VIEW_PENDING_REQUESTS.equals(choice)) {
-				viewPendingRequests();
+				try {
+					viewPendingRequests();
+				} catch (UserServiceException e) {
+					e.printStackTrace();
+				}
 			} else if(MAIN_MENU_OPTION_SEND_BUCKS.equals(choice)) {
 				sendBucks();
 			} else if(MAIN_MENU_OPTION_REQUEST_BUCKS.equals(choice)) {
@@ -131,6 +135,9 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			Scanner inputScanner = new Scanner(System.in);
 			try {
 				long transferId = Long.parseLong(inputScanner.nextLine());
+				if(transferId == 0){
+					mainMenu();
+				}
 				Transfer transfer = userService.getTransferById(transferId);
 				String fromUser = "";
 				String toUser = "";
@@ -157,9 +164,90 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
     }
 
-	private void viewPendingRequests() {
+	private void viewPendingRequests() throws UserServiceException {
 		// TODO Auto-generated method stub
-		
+		UserTransfer[] userTransfers = null;
+		long transferId = 0;
+
+		try {
+			userTransfers = userService.listPendingTransfers();
+		} catch (UserServiceException e) {
+			System.out.println(e.getMessage());
+		}
+
+		System.out.println("-------------------------------------------\n" +
+				"Transfers\n" +
+				"ID\t\t\tFrom/To  \t\t\tAmount\n" +
+				"-------------------------------------------\n");
+		for (UserTransfer userTransfer : userTransfers) {
+			System.out.print(userTransfer.getTransferId() + "        ");
+			if (userTransfer.getAccountFromUserName().equals(currentUser.getUser().getUsername())) {
+				if (userTransfer.getAccountToUsername().length() < 4)
+					System.out.print("To:    " + userTransfer.getAccountToUsername() + "\t\t\t$");
+				else System.out.print("To:    " + userTransfer.getAccountToUsername() + "\t\t$");
+			} else {
+				if (userTransfer.getAccountFromUserName().length() < 4) {
+					System.out.print("From:  " + userTransfer.getAccountFromUserName() + "\t\t\t$");
+				} else System.out.print("From:  " + userTransfer.getAccountFromUserName() + "\t\t$");
+
+			}
+			System.out.println(userTransfer.getAmount());
+		}
+		boolean isFirstGoodInput = false;
+		boolean isSecondGoodInput = false;
+		while (!isFirstGoodInput) {
+			System.out.print("Please enter transfer ID to view details (0 to cancel): ");
+			Scanner inputScanner = new Scanner(System.in);
+			try {
+				transferId = Long.parseLong(inputScanner.nextLine());
+				if(transferId == 0){
+					mainMenu();
+				}
+				Transfer transfer = userService.getTransferById(transferId);
+				String fromUser = "";
+				String toUser = "";
+				for (UserTransfer userTransfer : userTransfers) {
+					if (userTransfer.getTransferId() == transferId) {
+						fromUser = userTransfer.getAccountFromUserName();
+						toUser = userTransfer.getAccountToUsername();
+					}
+				}
+				System.out.println("--------------------------------------------\n" +
+						"Transfer Details\n" +
+						"--------------------------------------------");
+				System.out.println("Id: " + transfer.getTransfer_id());
+				System.out.println("From: " + fromUser);
+				System.out.println("To: " + toUser);
+				System.out.println("Type: " + transfer.getTransfer_type_desc());
+				System.out.println("Status: " + transfer.getTransfer_status_desc());
+				System.out.println("Amount: $" + transfer.getAmount());
+				isFirstGoodInput = true;
+			} catch (NumberFormatException e) {
+				System.out.println("Please enter a valid transfer ID");
+			}
+			while (!isSecondGoodInput) {
+				System.out.print("Would you like to accept or reject this pending transfer (1)Exit (2)Accept (3)Reject");
+				try {
+					String info;
+					String statusId = inputScanner.nextLine();
+					if (statusId.equals("2")) {
+						info=statusId+","+transferId;
+						userService.setStatusId(info);
+						isSecondGoodInput = true;
+					}
+					else if(statusId.equals("3")){
+						info=statusId+","+transferId;
+						userService.setStatusId(info);
+						isSecondGoodInput = true;
+					}
+					else mainMenu();
+					isSecondGoodInput  = true;
+				} catch (NumberFormatException e) {
+					System.out.println("Please enter a valid choice.");
+				}
+			}
+
+		}
 	}
 
 	private void sendBucks() {
@@ -178,10 +266,12 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 						"Enter ID of user you are sending to (0 to cancel): ");
 				Scanner inputScanner = new Scanner(System.in);
 				long receivingId = Long.parseLong(inputScanner.nextLine());
-
+				if(receivingId == 0){
+					mainMenu();
+				}
 				System.out.print("Enter amount: ");
 				BigDecimal amount = new BigDecimal(inputScanner.nextLine());
-				userService.sendMoney(currentUser.getUser().getId(), receivingId, amount);
+				userService.sendMoney(currentUser.getUser().getId(), receivingId, amount, Long.valueOf(2));
 				isGoodInput = true;
 			} catch (UserServiceException e) {
 				System.out.println(e.getMessage());
@@ -192,8 +282,34 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 
 	private void requestBucks() {
-		// TODO Auto-generated method stub
-		
+		boolean isGoodInput = false;
+		while (!isGoodInput) {
+			try {
+				System.out.println("-------------------------------------------\n" +
+						"Users\n" +
+						"ID          Name\n" +
+						"-------------------------------------------");
+				User[] users = userService.getUsers();
+				for (User user : users) {
+					System.out.println(user.getId() + "        " + user.getUsername());
+				}
+				System.out.print("----------\n\n" +
+						"Enter ID of user you are requesting bucks from (0 to cancel): ");
+				Scanner inputScanner = new Scanner(System.in);
+				long receivingId = Long.parseLong(inputScanner.nextLine());
+				if(receivingId == 0){
+					mainMenu();
+				}
+				System.out.print("Enter amount: ");
+				BigDecimal amount = new BigDecimal(inputScanner.nextLine());
+				userService.sendMoney(currentUser.getUser().getId(), receivingId, amount, Long.valueOf(1));
+				isGoodInput = true;
+			} catch (UserServiceException e) {
+				System.out.println(e.getMessage());
+			} catch (NumberFormatException e) {
+				System.out.println("Please provide a userId");
+			}
+		}
 	}
 	
 	private void exitProgram() {
