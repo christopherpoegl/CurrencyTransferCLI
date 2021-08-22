@@ -22,9 +22,9 @@ public interface TransferDao {
 
     public String getStatusDesc(long transferStatusId);
 
-    public long getTransfer_status_id(Transfer transfer);
+    public void acceptTransfer(long transferId);
 
-    public String setTransferStatusId(Long statusId, Long transferId);
+    public void rejectTransfer(long transferId);
 
     public List<Transfer> listPendingTransfersByAccountId(long accountId);
 

@@ -41,7 +41,7 @@ public class AccountController {
     }
 
     @RequestMapping(path = "/transfer/send", method = RequestMethod.POST)
-    public Transfer createTransfer(@RequestBody Transfer transfer) {
+    public Transfer createSendTransfer(@RequestBody Transfer transfer) {
         System.out.println("FROM: " + transfer.getAccount_from());
         System.out.println("TO: " + transfer.getAccount_to());
 
@@ -54,15 +54,28 @@ public class AccountController {
         return transfer;
     }
 
-    @RequestMapping(path = "/transfer/setStatus", method = RequestMethod.POST)
-    public String setStatusId(@RequestBody String statusId){
-        String[] info = statusId.split(",");
-        long sId = Long.parseLong(info[0]);
-        long tId = Long.parseLong(info[1]);
-        System.out.println(statusId);
-        System.out.println(info[0]);
-        System.out.println(info[1]);
-        return transferDao.setTransferStatusId(sId, tId);
+    @RequestMapping(path = "/transfer/{id}/reject", method = RequestMethod.POST)
+    public void rejectRequest(@PathVariable("id") Long id){
+        transferDao.rejectTransfer(id);
+    }
+
+    @RequestMapping(path = "/transfer/{id}/accept", method = RequestMethod.POST)
+    public void acceptRequest(@PathVariable("id") Long id) {
+        transferDao.acceptTransfer(id);
+    }
+
+    @RequestMapping(path = "/transfer/request")
+    public Transfer createRequestTransfer(@RequestBody Transfer transfer) {
+        System.out.println("FROM: " + transfer.getAccount_from());
+        System.out.println("TO: " + transfer.getAccount_to());
+
+
+        long accountNo = accountDao.getAccountIdByUserId(transfer.getAccount_from());
+        transfer.setAccount_from(accountNo);
+        accountNo = accountDao.getAccountIdByUserId(transfer.getAccount_to());
+        transfer.setAccount_to(accountNo);
+        transfer = transferDao.createTransfer(transfer);
+        return transfer;
     }
 
     @RequestMapping(path = "/transfers/list", method = RequestMethod.GET)

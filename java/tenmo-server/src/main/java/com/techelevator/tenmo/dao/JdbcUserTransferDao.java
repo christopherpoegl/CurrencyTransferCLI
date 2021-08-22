@@ -28,7 +28,7 @@ public class JdbcUserTransferDao implements UserTransferDao {
     @Override
     public UserTransfer getUserTransferInfo(long transferId) {
         UserTransfer userTransfer = null;
-        String sql = "SELECT transfers.transfer_id, transfers.account_from, transfers.account_to, transfers.amount, users.username FROM transfers\n" +
+        String sql = "SELECT transfers.transfer_id, transfers.transfer_status_id, transfers.transfer_type_id, transfers.account_from, transfers.account_to, transfers.amount, users.username FROM transfers\n" +
                 "JOIN accounts ON account_id = transfers.account_from\n" +
                 "JOIN users ON accounts.user_id = users.user_id\n" +
                 "WHERE transfers.transfer_id = ?;";
@@ -65,6 +65,7 @@ public class JdbcUserTransferDao implements UserTransferDao {
     public UserTransfer mapRowsToUserTransfer(SqlRowSet rowSetFrom, SqlRowSet rowSetTo) {
         UserTransfer userTransfer = new UserTransfer();
         userTransfer.setTransferId(rowSetFrom.getLong("transfer_id"));
+        userTransfer.setTransferStatusId(rowSetFrom.getLong("transfer_status_id"));
         userTransfer.setAccountFromId(rowSetFrom.getLong("account_from"));
         userTransfer.setAccountToId(rowSetFrom.getLong("account_to"));
         userTransfer.setAccountFromUserName(rowSetFrom.getString("username"));

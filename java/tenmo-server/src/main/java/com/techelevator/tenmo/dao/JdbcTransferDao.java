@@ -25,8 +25,10 @@ public class JdbcTransferDao implements TransferDao {
             transfer.setTransfer_status_id(2);
             transfer.setTransfer_type_id(2);
             transfer.setTransfer_type_desc("Approved");
+            send(transfer.getAccount_from(), transfer.getAccount_to(), transfer.getAmount(), transfer.getTransfer_status_id());
         }
-        send(transfer.getAccount_from(), transfer.getAccount_to(), transfer.getAmount(), transfer.getTransfer_status_id());
+        else transfer.setTransfer_status_id(1);
+
         String sql = "INSERT INTO transfers (transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
                 "VALUES (?,?,?,?,?) RETURNING transfer_id";
         long transfer_id = jdbcTemplate.queryForObject(sql, Long.class, transfer.getTransfer_type_id(), transfer.getTransfer_status_id(), transfer.getAccount_from(), transfer.getAccount_to(), transfer.getAmount());
@@ -38,12 +40,6 @@ public class JdbcTransferDao implements TransferDao {
         if(transferStatusId==2) {
             accountDao.updateAccountBalances(sendingAccountId, receivingAccountId, amount);
         }
-    }
-
-    public String setTransferStatusId(Long statusId, Long transferId){
-        String sql = "UPDATE transfers SET transfer_status_id = ? WHERE transfer_id = ?;";
-        jdbcTemplate.update(sql, statusId, transferId);
-        return sql;
     }
 
 
@@ -63,7 +59,6 @@ public class JdbcTransferDao implements TransferDao {
     public List<Transfer> listPendingTransfersByAccountId(long accountId){
         List<Transfer> transfers = new ArrayList<>();
         String sql = "SELECT transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount FROM transfers " +
-                "JOIN accounts ON account_to = accounts.account_id " +
                 "WHERE transfer_status_id = 1 AND account_to = ?;";
         SqlRowSet results = jdbcTemplate.queryForRowSet(sql, accountId);
         while(results.next()) {
@@ -97,6 +92,26 @@ public class JdbcTransferDao implements TransferDao {
     }
 
     @Override
+    public void acceptTransfer(long transferId) {
+        String sql = "UPDATE transfers SET transfer_status_id = 2 " +
+                "WHERE transfer_id = ?;";
+        jdbcTemplate.update(sql, transferId);
+        Transfer transfer = getTransferByTransferId(transferId);
+        if (transfer.getTransfer_type_id() == 1) {
+            send(transfer.getAccount_to(), transfer.getAccount_from(), transfer.getAmount(), transfer.getTransfer_status_id());
+        }
+        if (transfer.getTransfer_type_id() == 2) {
+            send(transfer.getAccount_from(), transfer.getAccount_to(), transfer.getAmount(), transfer.getTransfer_status_id());
+        }
+    }
+
+    @Override
+    public void rejectTransfer(long transferId) {
+        String sql = "UPDATE transfers SET transfer_status_id = 3 " +
+                "WHERE transfer_id = ?;";
+        jdbcTemplate.update(sql, transferId);
+    }
+
     public long getTransfer_status_id(Transfer transfer) {
 
         String sql = "SELECT transfer_status_id FROM transfer_statuses WHERE transfer_id = ?;";

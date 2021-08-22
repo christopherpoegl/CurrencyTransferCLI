@@ -174,56 +174,47 @@ private static final String API_BASE_URL = "http://localhost:8080/";
     }
 
 	private void viewPendingRequests() throws UserServiceException {
-		// TODO Auto-generated method stub
-		UserTransfer[] userTransfers = null;
-		long transferId = 0;
-
+		UserTransfer[] pendingTransfers = null;
 		try {
-			userTransfers = userService.listPendingTransfers();
+			pendingTransfers = userService.listPendingTransfers();
+			System.out.println("Length is: " + pendingTransfers.length);
 		} catch (UserServiceException e) {
 			System.out.println(e.getMessage());
+			mainMenu();
 		}
-
 		System.out.println("-------------------------------------------\n" +
 				"Transfers\n" +
-				"ID\t\t\tFrom/To  \t\t\tAmount\n" +
-				"-------------------------------------------\n");
-		for (UserTransfer userTransfer : userTransfers) {
+				"ID\t\t\tFrom  \t\t\tAmount\n" +
+				"-------------------------------------------");
+		for(UserTransfer userTransfer : pendingTransfers) {
 			System.out.print(userTransfer.getTransferId() + "        ");
-			if (userTransfer.getAccountToUsername().equals(currentUser.getUser().getUsername())) {
-				if (userTransfer.getAccountToUsername().length() < 4)
-					System.out.print("To:    " + userTransfer.getAccountToUsername() + "\t\t\t$");
-				else System.out.print("To:    " + userTransfer.getAccountToUsername() + "\t\t$");
-			} else {
-				if (userTransfer.getAccountFromUserName().length() < 4) {
-					System.out.print("From:  " + userTransfer.getAccountFromUserName() + "\t\t\t$");
-				} else System.out.print("From:  " + userTransfer.getAccountFromUserName() + "\t\t$");
-
-			}
+			if (userTransfer.getAccountFromUserName().length() < 4) {
+				System.out.print("From:  " + userTransfer.getAccountFromUserName() + "\t\t\t$");
+			} else System.out.print("From:  " + userTransfer.getAccountFromUserName() + "\t\t$");
 			System.out.println(userTransfer.getAmount());
 		}
-		boolean isFirstGoodInput = false;
-		boolean isSecondGoodInput = false;
-		while (!isFirstGoodInput) {
-			System.out.print("Please enter transfer ID to view details (0 to cancel): ");
+		boolean isGoodInput = false;
+		Transfer transfer = null;
+		while (!isGoodInput) {
+			System.out.print("\nPlease enter transfer ID to view details (0 to cancel): ");
 			Scanner inputScanner = new Scanner(System.in);
 			try {
-				transferId = Long.parseLong(inputScanner.nextLine());
-				if(transferId == 0){
+				long transferId = Long.parseLong(inputScanner.nextLine());
+				if (transferId == 0) {
 					mainMenu();
 				}
-				Transfer transfer = userService.getTransferById(transferId);
-				String fromUser = null;
-				String toUser = null;
-				for (UserTransfer userTransfer : userTransfers) {
+				transfer = userService.getTransferById(transferId);
+				String fromUser = "";
+				String toUser = "";
+				for (UserTransfer userTransfer : pendingTransfers) {
 					if (userTransfer.getTransferId() == transferId) {
 						fromUser = userTransfer.getAccountFromUserName();
 						toUser = userTransfer.getAccountToUsername();
 					}
 				}
+				if (transfer == null) throw new UserServiceException("No message");
 				if (fromUser == null) throw new UserServiceException("No message");
 				if (toUser == null) throw new UserServiceException("No message");
-
 				System.out.println("--------------------------------------------\n" +
 						"Transfer Details\n" +
 						"--------------------------------------------");
@@ -233,50 +224,49 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				System.out.println("Type: " + transfer.getTransfer_type_desc());
 				System.out.println("Status: " + transfer.getTransfer_status_desc());
 				System.out.println("Amount: $" + transfer.getAmount());
-				isFirstGoodInput = true;
+				isGoodInput = true;
 			} catch (NumberFormatException e) {
 				System.out.println("Please enter a valid transfer ID");
 			} catch (UserServiceException e) {
-				if (e.getMessage().contains("No message")){
-			System.out.println("Please enter a valid transfer ID");
-				continue;
-			}
+				if (e.getMessage().contains("No message")) System.out.println("Please enter a valid transfer ID");
 				else {
 					System.out.println(e.getMessage());
 					mainMenu();
 				}
 			}
-			while (!isSecondGoodInput) {
-				System.out.print("Would you like to accept or reject this pending transfer (1)Exit (2)Accept (3)Reject: ");
-				try {
-					String info;
-					String statusId = inputScanner.nextLine();
-					if (statusId.equals("2")) {
-						info=statusId+","+transferId;
-						userService.setStatusId(info);
-						isSecondGoodInput = true;
-					}
-					else if(statusId.equals("3")){
-						info=statusId+","+transferId;
-						userService.setStatusId(info);
-						isSecondGoodInput = true;
-					}
-					else if (statusId.equals("1")) {
-						mainMenu();
-						isSecondGoodInput = true;
-					}
-				} catch (NumberFormatException e) {
-					System.out.println("Please enter a valid choice.");
-				} catch (UserServiceException e) {
-					System.out.println(e.getMessage());
-					if (e.getMessage().contains("No message")) System.out.println("Please enter a valid choice");
-					else {
-						System.out.println(e.getMessage());
-						mainMenu();
-					}
-				}
-			}
+		}
+		isGoodInput = false;
+		while (!isGoodInput) {
+			System.out.print("1: Approve\n" +
+						"2: Reject\n" +
+						"0: Don't approve or reject\n" +
+						"---------\n" +
+						"Please choose an option: ");
 
+			try {
+				Scanner inputScanner = new Scanner(System.in);
+				int choice = Integer.parseInt(inputScanner.nextLine());
+				System.out.println(choice);
+				if (choice == 1) {
+					userService.acceptTransfer(transfer.getTransfer_id());
+					isGoodInput = true;
+				}
+				else if (choice == 2) {
+					userService.rejectTransfer(transfer.getTransfer_id());
+					isGoodInput = true;
+				}
+				else if (choice == 0) break;
+				else System.out.println("Please enter a valid choice");
+			} catch (UserServiceException e) {
+				if (e.getMessage().contains("No message")) {
+					System.out.println(e.getMessage());
+					System.out.println("Please enter a valid choice");
+				}
+				else {
+					System.out.println(e.getMessage());
+					mainMenu();
+				}
+		}
 		}
 	}
 
@@ -301,7 +291,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				}
 				System.out.print("Enter amount: ");
 				BigDecimal amount = new BigDecimal(inputScanner.nextLine());
-				userService.sendMoney(currentUser.getUser().getId(), receivingId, amount, Long.valueOf(2));
+				userService.sendMoney(currentUser.getUser().getId(), receivingId, amount);
 				isGoodInput = true;
 			} catch (UserServiceException e) {
 				if (e.getMessage().contains("No message")) System.out.println("Please provide a userId");
@@ -328,7 +318,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 					System.out.println(user.getId() + "        " + user.getUsername());
 				}
 				System.out.print("----------\n\n" +
-						"Enter ID of user you are requesting bucks from (0 to cancel): ");
+						"Enter ID of user you are requesting from (0 to cancel): ");
 				Scanner inputScanner = new Scanner(System.in);
 				long receivingId = Long.parseLong(inputScanner.nextLine());
 				if(receivingId == 0){
@@ -336,7 +326,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				}
 				System.out.print("Enter amount: ");
 				BigDecimal amount = new BigDecimal(inputScanner.nextLine());
-				userService.sendMoney(currentUser.getUser().getId(), receivingId, amount, Long.valueOf(1));
+				userService.requestMoney(currentUser.getUser().getId(), receivingId, amount);
 				isGoodInput = true;
 			} catch (UserServiceException e) {
 				if (e.getMessage().contains("No message")) System.out.println("Please provide a userId");
@@ -349,6 +339,8 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			}
 		}
 	}
+
+
 	
 	private void exitProgram() {
 		System.exit(0);
