@@ -6,68 +6,74 @@ public class UserTransfer {
 
     private long transferId;
     private long transferStatusId;
-    private long accountFromId;
-    private long accountToId;
+    private String transferStatusDesc;
+    private long transferTypeId;
+    private String transferTypeDesc;
     private String accountFromUserName;
     private String accountToUsername;
     private BigDecimal amount;
 
-    public UserTransfer() {
+    public void setTransferStatusDesc(String transferStatusDesc) {
+        this.transferStatusDesc = transferStatusDesc;
     }
 
-    public long getTransferId() {
-        return transferId;
+    public void setTransferTypeDesc(String transferTypeDesc) {
+        this.transferTypeDesc = transferTypeDesc;
     }
 
     public void setTransferId(long transferId) {
         this.transferId = transferId;
     }
 
-    public long getAccountFromId() {
-        return accountFromId;
+    public void setTransferStatusId(long transferStatusId) {
+        this.transferStatusId = transferStatusId;
     }
 
-    public void setAccountFromId(long accountFromId) {
-        this.accountFromId = accountFromId;
-    }
-
-    public long getAccountToId() {
-        return accountToId;
-    }
-
-    public void setAccountToId(long accountToId) {
-        this.accountToId = accountToId;
-    }
-
-    public String getAccountFromUserName() {
-        return accountFromUserName;
+    public void setTransferTypeId(long transferTypeId) {
+        this.transferTypeId = transferTypeId;
     }
 
     public void setAccountFromUserName(String accountFromUserName) {
         this.accountFromUserName = accountFromUserName;
     }
 
-    public String getAccountToUsername() {
-        return accountToUsername;
-    }
-
     public void setAccountToUsername(String accountToUsername) {
         this.accountToUsername = accountToUsername;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
     }
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
+    public String getTransferStatusDesc() {
+        return transferStatusDesc;
+    }
+
+    public String getTransferTypeDesc() {
+        return transferTypeDesc;
+    }
+
+    public long getTransferId() {
+        return transferId;
+    }
+
     public long getTransferStatusId() {
         return transferStatusId;
     }
 
-    public void setTransferStatusId(long transferStatusId) {
-        this.transferStatusId = transferStatusId;
+    public long getTransferTypeId() {
+        return transferTypeId;
+    }
+
+    public String getAccountFromUserName() {
+        return accountFromUserName;
+    }
+
+    public String getAccountToUsername() {
+        return accountToUsername;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
     }
 }

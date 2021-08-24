@@ -8,10 +8,12 @@ import java.util.List;
 
 public interface UserTransferDao {
 
-    UserTransfer getUserTransferInfo(long transferId);
+    UserTransfer getUserTransferInfoById(long transferId);
 
-    List<UserTransfer> getUserTransferList(long accountId);
+    List<UserTransfer> getUserTransferListByUserName(String userName);
 
-    List<UserTransfer> getPendingUserTransferList(long accountId);
+    List<UserTransfer> getPendingUserTransferList(String userName);
+
+    String getTransferStatusDesc(long transferStatusId);
 
 }

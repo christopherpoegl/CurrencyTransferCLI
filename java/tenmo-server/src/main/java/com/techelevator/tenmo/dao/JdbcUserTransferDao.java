@@ -26,9 +26,10 @@ public class JdbcUserTransferDao implements UserTransferDao {
 
     UserTransfer userTransfer = new UserTransfer();
     @Override
-    public UserTransfer getUserTransferInfo(long transferId) {
+    public UserTransfer getUserTransferInfoById(long transferId) {
         UserTransfer userTransfer = null;
-        String sql = "SELECT transfers.transfer_id, transfers.transfer_status_id, transfers.transfer_type_id, transfers.account_from, transfers.account_to, transfers.amount, users.username FROM transfers\n" +
+        String sql = "SELECT transfers.transfer_id, transfers.transfer_type_id, transfers.transfer_status_id, " +
+                "transfers.transfer_type_id, transfers.amount, users.username FROM transfers\n" +
                 "JOIN accounts ON account_id = transfers.account_from\n" +
                 "JOIN users ON accounts.user_id = users.user_id\n" +
                 "WHERE transfers.transfer_id = ?;";
@@ -44,32 +45,67 @@ public class JdbcUserTransferDao implements UserTransferDao {
         return userTransfer;
     }
 
-    public List<UserTransfer> getUserTransferList(long accountId) {
+    public List<UserTransfer> getUserTransferListByUserName(String userName) {
         List<UserTransfer> userTransfers = new ArrayList<>();
-        List<Transfer> transfers = transferDao.listTransfersByAccountId(accountId);
-        for (Transfer transfer : transfers) {
-            userTransfers.add(getUserTransferInfo(transfer.getTransfer_id()));
+        UserTransfer userTransfer = null;
+        String sql = "SELECT transfers.transfer_id, transfers.transfer_type_id, transfers.transfer_status_id, " +
+                "transfers.transfer_type_id, transfers.amount, users.username FROM transfers\n" +
+                "JOIN accounts ON account_id = transfers.account_from\n" +
+                "JOIN users ON accounts.user_id = users.user_id\n" +
+                "WHERE users.user_name = ?;";
+        SqlRowSet resultsFrom = jdbcTemplate.queryForRowSet(sql, userName);
+        sql = "SELECT transfers.transfer_id, transfers.account_from, transfers.account_to, transfers.amount, users.username FROM transfers\n" +
+                "JOIN accounts ON account_id = transfers.account_to\n" +
+                "JOIN users ON accounts.user_id = users.user_id\n" +
+                "WHERE users.user_name = ?;";
+        SqlRowSet resultsTo = jdbcTemplate.queryForRowSet(sql, userName);
+        if (resultsFrom.next() && resultsTo.next()) {
+            userTransfers.add(mapRowsToUserTransfer(resultsFrom, resultsTo));
         }
         return userTransfers;
     }
 
-    public List<UserTransfer> getPendingUserTransferList(long accountId) {
+    public List<UserTransfer> getPendingUserTransferList(String userName) {
         List<UserTransfer> userTransfers = new ArrayList<>();
-        List<Transfer> transfers = transferDao.listPendingTransfersByAccountId(accountId);
-        for (Transfer transfer : transfers) {
-            userTransfers.add(getUserTransferInfo(transfer.getTransfer_id()));
+        String sql = "SELECT transfers.transfer_id, transfers.transfer_type_id, transfers.transfer_status_id, " +
+                "transfers.transfer_type_id, transfers.amount, users.username FROM transfers\n" +
+                "JOIN accounts ON account_id = transfers.account_to\n" +
+                "JOIN users ON accounts.user_id = users.user_id\n" +
+                "WHERE users.userName = ?;";
+        SqlRowSet toResults = jdbcTemplate.queryForRowSet(sql, userName);
+        while (toResults.next()) {
+            String fromUserSql = "SELECT transfers.transfer_id, transfers.transfer_type_id, transfers.transfer_status_id, " +
+                    "transfers.transfer_type_id, transfers.amount, users.username FROM transfers\n" +
+                    "JOIN accounts ON account_id = transfers.account_to\n" +
+                    "JOIN users ON accounts.user_id = users.user_id\n" +
+                    "WHERE transfers.transfer_id= ?;";
+            SqlRowSet fromResults = jdbcTemplate.queryForRowSet(sql, toResults.getLong("transfer_id"));
+            userTransfers.add(mapRowsToUserTransfer(fromResults, toResults));
         }
         return userTransfers;
+    }
+
+    public String getTransferStatusDesc(long transferStatusId) {
+        String sql = "SELECT transfer_status_desc FROM transfer_statuses " +
+                "WHERE transfer_status_id = ?";
+        return jdbcTemplate.queryForObject(sql, String.class, transferStatusId);
+    }
+
+    public String getTransferTypeId(long transferTypeId) {
+        String sql = "SELECT transfer_type_desc FROM transfer_types " +
+                "WHERE transfer_type_id = ?";
+        return jdbcTemplate.queryForObject(sql, String.class, transferTypeId);
     }
 
     public UserTransfer mapRowsToUserTransfer(SqlRowSet rowSetFrom, SqlRowSet rowSetTo) {
         UserTransfer userTransfer = new UserTransfer();
-        userTransfer.setTransferId(rowSetFrom.getLong("transfer_id"));
-        userTransfer.setTransferStatusId(rowSetFrom.getLong("transfer_status_id"));
-        userTransfer.setAccountFromId(rowSetFrom.getLong("account_from"));
-        userTransfer.setAccountToId(rowSetFrom.getLong("account_to"));
+        userTransfer.setTransferId(rowSetTo.getLong("transfer_id"));
+        userTransfer.setTransferStatusId(rowSetTo.getLong("transfer_status_id"));
+        userTransfer.setTransferStatusDesc(getTransferStatusDesc(userTransfer.getTransferStatusId()));
+        userTransfer.setTransferTypeId(rowSetTo.getLong("transfer_type_id"));
+        userTransfer.setTransferTypeDesc(userTransfer.getTransferTypeId());
         userTransfer.setAccountFromUserName(rowSetFrom.getString("username"));
-        userTransfer.setAmount(rowSetFrom.getBigDecimal("amount"));
+        userTransfer.setAmount(rowSetTo.getBigDecimal("amount"));
         userTransfer.setAccountToUsername(rowSetTo.getString("username"));
         return userTransfer;
     }

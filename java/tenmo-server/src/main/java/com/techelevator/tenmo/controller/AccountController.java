@@ -80,16 +80,12 @@ public class AccountController {
 
     @RequestMapping(path = "/transfers/list", method = RequestMethod.GET)
     public List<UserTransfer> listTransfers(Principal principal) {
-        Account account = accountDao.getAccountByUserName(principal.getName());
-        long accountId = account.getId();
-        return userTransferDao.getUserTransferList(accountId);
+        return userTransferDao.getUserTransferListByUserName(principal.getName());
     }
 
     @RequestMapping(path = "/transfers/pending", method = RequestMethod.GET)
     public List<UserTransfer> listPendingTransfers(Principal principal) {
-        Account account = accountDao.getAccountByUserName(principal.getName());
-        long accountId = account.getId();
-        return userTransferDao.getPendingUserTransferList(accountId);
+        return userTransferDao.getPendingUserTransferList(principal.getName());
     }
 
     @RequestMapping(path = "/transfer/{id}", method = RequestMethod.GET)
