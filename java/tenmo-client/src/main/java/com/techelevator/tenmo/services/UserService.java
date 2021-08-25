@@ -1,6 +1,5 @@
 package com.techelevator.tenmo.services;
 
-import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
 import com.techelevator.tenmo.model.UserTransfer;
 import org.springframework.http.HttpEntity;
@@ -34,24 +33,23 @@ public class UserService {
     public UserTransfer[] listTransfers() throws UserServiceException {
         UserTransfer[] userTransfers = null;
         try {
-            return restTemplate.exchange(BASE_URL + "/transfers/list", HttpMethod.GET, makeAuthEntity(), UserTransfer[].class).getBody();
+            return restTemplate.exchange(BASE_URL + "/transfer", HttpMethod.GET, makeAuthEntity(), UserTransfer[].class).getBody();
         } catch (RestClientResponseException e) {
             throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
         }
     }
 
     public UserTransfer[] listPendingTransfers() throws UserServiceException {
-        UserTransfer[] PendingUserTransfers = null;
         try {
-            return restTemplate.exchange(BASE_URL + "/transfers/pending", HttpMethod.GET, makeAuthEntity(), UserTransfer[].class).getBody();
+            return restTemplate.exchange(BASE_URL + "/transfer/pending", HttpMethod.GET, makeAuthEntity(), UserTransfer[].class).getBody();
         } catch (RestClientResponseException e) {
             throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
         }
     }
 
-    public Transfer getTransferById(long id) throws UserServiceException {
+    public UserTransfer getUserTransferById(long id) throws UserServiceException {
         try {
-            return restTemplate.exchange(BASE_URL + "/transfer/" + id, HttpMethod.GET, makeAuthEntity(), Transfer.class).getBody();
+            return restTemplate.exchange(BASE_URL + "/transfer/" + id, HttpMethod.GET, makeAuthEntity(), UserTransfer.class).getBody();
         } catch (RestClientResponseException e) {
             throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
         }
@@ -83,44 +81,23 @@ public class UserService {
         }
     }
 
-    public Transfer sendMoney(long sendingUserId, Long receivingUserId, BigDecimal amount) throws UserServiceException {
+    public UserTransfer createTransfer(String sendingUserName, String receivingUserName, BigDecimal amount, String transferType) throws UserServiceException {
+        UserTransfer userTransfer = new UserTransfer();
 
-
-        Transfer transfer = new Transfer();
-        transfer.setTransfer_status_desc("Pending");
-        transfer.setAccount_from(sendingUserId);
-        transfer.setAccount_to(receivingUserId);
-        transfer.setTransfer_status_id(1);
-        transfer.setTransfer_type_id(2);
-        transfer.setTransfer_type_desc("Send");
-        transfer.setAmount(amount);
+        userTransfer.setAccountFromUserName(sendingUserName);
+        userTransfer.setAccountToUserName(receivingUserName);
+        userTransfer.setAmount(amount);
+        userTransfer.setTransferTypeDesc(transferType);
+        if (transferType.equals("Send")) userTransfer.setTransferStatusDesc("Approved");
+        else userTransfer.setTransferStatusDesc("Pending");
 
         try {
-            HttpEntity<Transfer> transferEntity = makeTransferEntity(transfer);
-            transferEntity = restTemplate.exchange(BASE_URL + "/transfer/send", HttpMethod.POST, transferEntity, Transfer.class);
+            HttpEntity<UserTransfer> userTransferEntity = makeUserTransferEntity(userTransfer);
+            userTransfer = restTemplate.exchange(BASE_URL + "/transfer/new", HttpMethod.POST, userTransferEntity, UserTransfer.class).getBody();
         } catch (RestClientResponseException e) {
             throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
         }
-        return transfer;
-    }
-
-    public Transfer requestMoney(long requestingId, Long receivingId, BigDecimal amount) throws UserServiceException {
-        Transfer transfer = new Transfer();
-        transfer.setTransfer_status_desc("Pending");
-        transfer.setAccount_from(requestingId);
-        transfer.setAccount_to(receivingId);
-        transfer.setTransfer_status_id(1);
-        transfer.setTransfer_type_id(1);
-        transfer.setTransfer_type_desc("Request");
-        transfer.setAmount(amount);
-
-        try {
-            HttpEntity<Transfer> transferEntity = makeTransferEntity(transfer);
-            transferEntity = restTemplate.exchange(BASE_URL + "/transfer/request", HttpMethod.POST, transferEntity, Transfer.class);
-        } catch (RestClientResponseException e) {
-            throw new UserServiceException(e.getRawStatusCode() + " : " + e.getResponseBodyAsString());
-        }
-        return transfer;
+        return userTransfer;
     }
 
     private HttpEntity<String> makeStatusId(String string) {
@@ -131,10 +108,10 @@ public class UserService {
         return entity;
     }
 
-        private HttpEntity<Transfer> makeTransferEntity(Transfer transfer) {
+        private HttpEntity<UserTransfer> makeUserTransferEntity(UserTransfer userTransfer) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(AUTH_TOKEN);
-        HttpEntity<Transfer> entity = new HttpEntity<>(transfer, headers);
+        HttpEntity<UserTransfer> entity = new HttpEntity<>(userTransfer, headers);
         if (entity == null) System.out.println("Entity is Null");
         return entity;
     }

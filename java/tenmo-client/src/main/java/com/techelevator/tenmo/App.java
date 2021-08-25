@@ -97,9 +97,6 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		} catch (UserServiceException e) {
 			System.out.println(e.getMessage());
 		}
-
-
-		
 	}
 
 	private void viewTransferHistory() throws UserServiceException {
@@ -118,9 +115,9 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		for(UserTransfer userTransfer : userTransfers) {
 			System.out.print(userTransfer.getTransferId() + "        ");
 			if (userTransfer.getAccountFromUserName().equals(currentUser.getUser().getUsername())) {
-				if (userTransfer.getAccountToUsername().length() < 4)
-					System.out.print("To:    " + userTransfer.getAccountToUsername() + "\t\t\t$");
-				else System.out.print("To:    " + userTransfer.getAccountToUsername() + "\t\t$");
+				if (userTransfer.getAccountToUserName().length() < 4)
+					System.out.print("To:    " + userTransfer.getAccountToUserName() + "\t\t\t$");
+				else System.out.print("To:    " + userTransfer.getAccountToUserName() + "\t\t$");
 			} else {
 				if (userTransfer.getAccountFromUserName().length() < 4) {
 					System.out.print("From:  " + userTransfer.getAccountFromUserName() + "\t\t\t$");
@@ -139,27 +136,23 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				if(transferId == 0){
 					mainMenu();
 				}
-				Transfer transfer = userService.getTransferById(transferId);
-				String fromUser = "";
-				String toUser = "";
-				for (UserTransfer userTransfer : userTransfers) {
-					if (userTransfer.getTransferId() == transferId) {
-						fromUser = userTransfer.getAccountFromUserName();
-						toUser = userTransfer.getAccountToUsername();
+				UserTransfer userTransfer = null;
+				for (UserTransfer option : userTransfers) {
+					if (option.getTransferId() == transferId) {
+						userTransfer = option;
+						break;
 					}
 				}
-				if (transfer == null) throw new UserServiceException("No message");
-				if (fromUser == null) throw new UserServiceException("No message");
-				if (toUser == null) throw new UserServiceException("No message");
+				if (userTransfer == null) throw new UserServiceException("No message");
 				System.out.println("--------------------------------------------\n" +
 						"Transfer Details\n" +
 						"--------------------------------------------");
-				System.out.println("Id: " + transfer.getTransfer_id());
-				System.out.println("From: " + fromUser);
-				System.out.println("To: " + toUser);
-				System.out.println("Type: " + transfer.getTransfer_type_desc());
-				System.out.println("Status: " + transfer.getTransfer_status_desc());
-				System.out.println("Amount: $" + transfer.getAmount());
+				System.out.println("Id: " + userTransfer.getTransferId());
+				System.out.println("From: " + userTransfer.getAccountFromUserName());
+				System.out.println("To: " + userTransfer.getAccountToUserName());
+				System.out.println("Type: " + userTransfer.getTransferTypeDesc());
+				System.out.println("Status: " + userTransfer.getTransferStatusDesc());
+				System.out.println("Amount: $" + userTransfer.getAmount());
 				isGoodInput = true;
 			} catch (NumberFormatException e) {
 				System.out.println("Please enter a valid transfer ID");
@@ -176,9 +169,10 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 	private void viewPendingRequests() throws UserServiceException {
 		UserTransfer[] pendingTransfers = null;
+		long transferId = 0;
+		UserTransfer userTransfer = null;
 		try {
 			pendingTransfers = userService.listPendingTransfers();
-			System.out.println("Length is: " + pendingTransfers.length);
 		} catch (UserServiceException e) {
 			System.out.println(e.getMessage());
 			mainMenu();
@@ -187,44 +181,38 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				"Transfers\n" +
 				"ID\t\t\tFrom  \t\t\tAmount\n" +
 				"-------------------------------------------");
-		for(UserTransfer userTransfer : pendingTransfers) {
-			System.out.print(userTransfer.getTransferId() + "        ");
-			if (userTransfer.getAccountFromUserName().length() < 4) {
-				System.out.print("From:  " + userTransfer.getAccountFromUserName() + "\t\t\t$");
-			} else System.out.print("From:  " + userTransfer.getAccountFromUserName() + "\t\t$");
-			System.out.println(userTransfer.getAmount());
+		for(UserTransfer option : pendingTransfers) {
+			System.out.print(option.getTransferId() + "        ");
+			if (option.getAccountFromUserName().length() < 4) {
+				System.out.print("From:  " + option.getAccountFromUserName() + "\t\t\t$");
+			} else System.out.print("From:  " + option.getAccountFromUserName() + "\t\t$");
+			System.out.println(option.getAmount());
 		}
 		boolean isGoodInput = false;
-		Transfer transfer = null;
 		while (!isGoodInput) {
 			System.out.print("\nPlease enter transfer ID to view details (0 to cancel): ");
 			Scanner inputScanner = new Scanner(System.in);
 			try {
-				long transferId = Long.parseLong(inputScanner.nextLine());
+				transferId = Long.parseLong(inputScanner.nextLine());
 				if (transferId == 0) {
 					mainMenu();
 				}
-				transfer = userService.getTransferById(transferId);
-				String fromUser = "";
-				String toUser = "";
-				for (UserTransfer userTransfer : pendingTransfers) {
-					if (userTransfer.getTransferId() == transferId) {
-						fromUser = userTransfer.getAccountFromUserName();
-						toUser = userTransfer.getAccountToUsername();
+				for (UserTransfer option : pendingTransfers)  {
+					if (option.getTransferId() == transferId) {
+						userTransfer = option;
+						break;
 					}
 				}
-				if (transfer == null) throw new UserServiceException("No message");
-				if (fromUser == null) throw new UserServiceException("No message");
-				if (toUser == null) throw new UserServiceException("No message");
+				if (userTransfer == null) throw new UserServiceException("No message");
 				System.out.println("--------------------------------------------\n" +
 						"Transfer Details\n" +
 						"--------------------------------------------");
-				System.out.println("Id: " + transfer.getTransfer_id());
-				System.out.println("From: " + fromUser);
-				System.out.println("To: " + toUser);
-				System.out.println("Type: " + transfer.getTransfer_type_desc());
-				System.out.println("Status: " + transfer.getTransfer_status_desc());
-				System.out.println("Amount: $" + transfer.getAmount());
+				System.out.println("Id: " + userTransfer.getTransferId());
+				System.out.println("From: " + userTransfer.getAccountFromUserName());
+				System.out.println("To: " + userTransfer.getAccountToUserName());
+				System.out.println("Type: " + userTransfer.getTransferTypeDesc());
+				System.out.println("Status: " + userTransfer.getTransferStatusDesc());
+				System.out.println("Amount: $" + userTransfer.getAmount());
 				isGoodInput = true;
 			} catch (NumberFormatException e) {
 				System.out.println("Please enter a valid transfer ID");
@@ -247,13 +235,12 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			try {
 				Scanner inputScanner = new Scanner(System.in);
 				int choice = Integer.parseInt(inputScanner.nextLine());
-				System.out.println(choice);
 				if (choice == 1) {
-					userService.acceptTransfer(transfer.getTransfer_id());
+					userService.acceptTransfer(transferId);
 					isGoodInput = true;
 				}
 				else if (choice == 2) {
-					userService.rejectTransfer(transfer.getTransfer_id());
+					userService.rejectTransfer(transferId);
 					isGoodInput = true;
 				}
 				else if (choice == 0) break;
@@ -280,6 +267,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 						"ID          Name\n" +
 						"-------------------------------------------");
 				User[] users = userService.getUsers();
+				User choice = null;
 				for (User user : users) {
 					System.out.println(user.getId() + "        " + user.getUsername());
 				}
@@ -290,9 +278,19 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				if(receivingId == 0){
 					mainMenu();
 				}
+				for (User user : users) {
+					if (user.getId() == receivingId) {
+						choice = user;
+						System.out.println(choice.getUsername());
+						break;
+					}
+				}
+				if (choice == null) {
+					throw new UserServiceException("No message");
+				}
 				System.out.print("Enter amount: ");
 				BigDecimal amount = new BigDecimal(inputScanner.nextLine());
-				userService.sendMoney(currentUser.getUser().getId(), receivingId, amount);
+				userService.createTransfer(currentUser.getUser().getUsername(), choice.getUsername(), amount, "Send");
 				isGoodInput = true;
 			} catch (UserServiceException e) {
 				if (e.getMessage().contains("No message")) System.out.println("Please provide a userId");
@@ -325,9 +323,17 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				if(receivingId == 0){
 					mainMenu();
 				}
+				User choice = null;
+				for (User user : users) {
+					if (user.getId() == receivingId) {
+						choice = user;
+						break;
+					}
+				}
+				if (choice == null) throw new UserServiceException("No message");
 				System.out.print("Enter amount: ");
 				BigDecimal amount = new BigDecimal(inputScanner.nextLine());
-				userService.requestMoney(currentUser.getUser().getId(), receivingId, amount);
+				userService.createTransfer(currentUser.getUser().getUsername(), choice.getUsername(), amount, "Request");
 				isGoodInput = true;
 			} catch (UserServiceException e) {
 				if (e.getMessage().contains("No message")) System.out.println("Please provide a userId");

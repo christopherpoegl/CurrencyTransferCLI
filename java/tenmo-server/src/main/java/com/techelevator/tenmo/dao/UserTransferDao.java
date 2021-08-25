@@ -16,4 +16,16 @@ public interface UserTransferDao {
 
     String getTransferStatusDesc(long transferStatusId);
 
+    String getTransferTypeDesc(long transferTypeId);
+
+    long getTransferTypeId(String transferTypeDesc);
+
+    long getTransferStatusId(String transferStatusDesc);
+
+    void createTransfer(UserTransfer userTransfer);
+
+    void rejectRequest(long transferId);
+
+    void acceptRequest(long transferId);
+
 }
